@@ -1,17 +1,17 @@
 'use client'
 
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useState } from 'react'
 import NextImage from 'next/image'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
+import { useCanvasImage } from '@/context/CanvasImageContext'
+import { ImageFilter } from '@/lib/imageFilters'
 
 interface NanoBananaResponse {
   contentType: string
   data: string
 }
-
-type ImageFilter = 'grayscale' | 'sepia' | 'invert' | 'none'
 
 const decodeBase64ToUint8Array = (base64Data: string): Uint8Array => {
   const normalized = base64Data.replace(/\s/g, '')
@@ -26,85 +26,36 @@ const decodeBase64ToUint8Array = (base64Data: string): Uint8Array => {
   return bytes
 }
 
-const applyFilterToImage = async (sourceDataUrl: string, filter: ImageFilter): Promise<string> =>
-  new Promise((resolve, reject) => {
-    if (filter === 'none') {
-      resolve(sourceDataUrl)
-      return
-    }
-
-    const imageElement = document.createElement('img')
-    imageElement.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = imageElement.width
-      canvas.height = imageElement.height
-
-      const context = canvas.getContext('2d')
-      if (!context) {
-        reject(new Error('Unable to process image: Canvas not supported.'))
-        return
-      }
-
-      context.drawImage(imageElement, 0, 0)
-      const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-      const { data } = imageData
-
-      for (let index = 0; index < data.length; index += 4) {
-        const red = data[index]
-        const green = data[index + 1]
-        const blue = data[index + 2]
-
-        if (filter === 'grayscale') {
-          const average = 0.299 * red + 0.587 * green + 0.114 * blue
-          data[index] = average
-          data[index + 1] = average
-          data[index + 2] = average
-          continue
-        }
-
-        if (filter === 'sepia') {
-          data[index] = Math.min(0.393 * red + 0.769 * green + 0.189 * blue, 255)
-          data[index + 1] = Math.min(0.349 * red + 0.686 * green + 0.168 * blue, 255)
-          data[index + 2] = Math.min(0.272 * red + 0.534 * green + 0.131 * blue, 255)
-          continue
-        }
-
-        if (filter === 'invert') {
-          data[index] = 255 - red
-          data[index + 1] = 255 - green
-          data[index + 2] = 255 - blue
-        }
-      }
-
-      context.putImageData(imageData, 0, 0)
-      resolve(canvas.toDataURL('image/png'))
-    }
-
-    imageElement.onerror = () => {
-      reject(new Error('Failed to load the selected image for processing.'))
-    }
-
-    imageElement.src = sourceDataUrl
-  })
 
 export default function NanoBananaImageUploader(): JSX.Element | null {
   const { user, approvalStatus } = useAuth()
+  const {
+    currentImage,
+    filter,
+    applyFilter,
+    isProcessing,
+    error: canvasError,
+    showUploadedImage,
+    clearImage,
+  } = useCanvasImage()
   const [imageUrl, setImageUrl] = useState('')
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [storagePath, setStoragePath] = useState('')
   const [downloadUrl, setDownloadUrl] = useState('')
   const [localFile, setLocalFile] = useState<File | null>(null)
-  const [originalPreview, setOriginalPreview] = useState('')
-  const [processedPreview, setProcessedPreview] = useState('')
-  const [filter, setFilter] = useState<ImageFilter>('grayscale')
-  const [processingFilter, setProcessingFilter] = useState(false)
   const [localError, setLocalError] = useState('')
   const [localUploading, setLocalUploading] = useState(false)
   const [originalStoragePath, setOriginalStoragePath] = useState('')
   const [processedStoragePath, setProcessedStoragePath] = useState('')
   const [originalDownloadUrl, setOriginalDownloadUrl] = useState('')
   const [processedDownloadUrl, setProcessedDownloadUrl] = useState('')
+
+  const isUploadedImageActive = currentImage?.source === 'uploaded'
+  const uploadedOriginalPreview = isUploadedImageActive
+    ? currentImage.originalDataUrl ?? currentImage.originalUrl
+    : ''
+  const uploadedProcessedPreview = isUploadedImageActive ? currentImage.displayUrl : ''
 
   const hasApproval = user && approvalStatus === 'approved'
 
@@ -187,24 +138,27 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
 
     if (!file) {
       setLocalFile(null)
-      setOriginalPreview('')
-      setProcessedPreview('')
+      if (isUploadedImageActive) {
+        clearImage()
+      }
       return
     }
 
     if (!file.type.startsWith('image/')) {
       setLocalError('Only image files can be uploaded.')
       setLocalFile(null)
-      setOriginalPreview('')
-      setProcessedPreview('')
+      if (isUploadedImageActive) {
+        clearImage()
+      }
       return
     }
 
     if (file.size > 10 * 1024 * 1024) {
       setLocalError('Please select an image that is 10MB or smaller.')
       setLocalFile(null)
-      setOriginalPreview('')
-      setProcessedPreview('')
+      if (isUploadedImageActive) {
+        clearImage()
+      }
       return
     }
 
@@ -212,66 +166,61 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
     const reader = new FileReader()
     reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : ''
-      setOriginalPreview(result)
+
+      if (!result) {
+        setLocalError('Failed to read the selected file. Please try again.')
+        setLocalFile(null)
+        if (isUploadedImageActive) {
+          clearImage()
+        }
+        return
+      }
+
+      void showUploadedImage(result, {
+        prompt: file.name,
+        initialFilter: 'grayscale',
+      }).catch((processingError: unknown) => {
+        console.error('Failed to prepare uploaded image:', processingError)
+        setLocalError(
+          processingError instanceof Error
+            ? processingError.message
+            : 'Failed to process the uploaded image.'
+        )
+      })
     }
     reader.onerror = () => {
       setLocalError('Failed to read the selected file. Please try again.')
       setLocalFile(null)
+      if (isUploadedImageActive) {
+        clearImage()
+      }
     }
     reader.readAsDataURL(file)
   }
 
-  useEffect(() => {
-    let isMounted = true
-
-    if (!originalPreview) {
-      setProcessedPreview('')
-      return () => {
-        isMounted = false
-      }
-    }
-
-    setProcessingFilter(true)
-
-    applyFilterToImage(originalPreview, filter)
-      .then((result) => {
-        if (isMounted) {
-          setProcessedPreview(result)
-          setLocalError('')
-        }
-      })
-      .catch((processingError: unknown) => {
-        console.error('Failed to process uploaded image:', processingError)
-        if (isMounted) {
-          setLocalError(
-            processingError instanceof Error
-              ? processingError.message
-              : 'Failed to process the uploaded image.'
-          )
-          setProcessedPreview('')
-        }
-      })
-      .finally(() => {
-        if (isMounted) {
-          setProcessingFilter(false)
-        }
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [originalPreview, filter])
-
   const handleLocalUpload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!localFile || !originalPreview) {
+    if (!localFile) {
       setLocalError('Please select an image to upload.')
       return
     }
 
-    if (!processedPreview) {
+    if (!isUploadedImageActive || !currentImage) {
+      setLocalError('Please select an image to upload before submitting.')
+      return
+    }
+
+    if (isProcessing) {
       setLocalError('Processed image not ready yet. Please wait a moment and try again.')
+      return
+    }
+
+    const originalPreview = uploadedOriginalPreview
+    const processedPreview = uploadedProcessedPreview
+
+    if (!originalPreview || !processedPreview) {
+      setLocalError('Image preview not ready yet. Please try again in a moment.')
       return
     }
 
@@ -426,8 +375,8 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
             <select
               id="image-filter"
               value={filter}
-              onChange={(event) => setFilter(event.target.value as ImageFilter)}
-              disabled={!originalPreview || processingFilter}
+              onChange={(event) => void applyFilter(event.target.value as ImageFilter)}
+              disabled={!isUploadedImageActive || isProcessing}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700"
             >
               <option value="grayscale">Dramatic Grayscale</option>
@@ -437,16 +386,20 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
             </select>
           </div>
 
-          {processingFilter && (
+          {isUploadedImageActive && isProcessing && (
             <p className="text-sm text-gray-500 dark:text-gray-400">Applying filter&hellip;</p>
           )}
 
+          {isUploadedImageActive && canvasError && (
+            <p className="text-sm text-red-600 dark:text-red-400">{canvasError}</p>
+          )}
+
           <div className="grid gap-4 md:grid-cols-2">
-            {originalPreview && (
+            {uploadedOriginalPreview && (
               <div>
                 <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Original</p>
                 <NextImage
-                  src={originalPreview}
+                  src={uploadedOriginalPreview}
                   alt="Original upload preview"
                   width={400}
                   height={400}
@@ -456,11 +409,11 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
               </div>
             )}
 
-            {processedPreview && (
+            {uploadedProcessedPreview && (
               <div>
                 <p className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Edited</p>
                 <NextImage
-                  src={processedPreview}
+                  src={uploadedProcessedPreview}
                   alt="Processed upload preview"
                   width={400}
                   height={400}
@@ -473,7 +426,13 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
 
           <button
             type="submit"
-            disabled={!localFile || processingFilter || !processedPreview || localUploading}
+            disabled={
+              !localFile ||
+              !isUploadedImageActive ||
+              !uploadedProcessedPreview ||
+              localUploading ||
+              isProcessing
+            }
             className="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
           >
             {localUploading ? 'Uploading images…' : 'Upload both versions'}
