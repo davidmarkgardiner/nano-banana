@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext'
 import LoginForm from '@/components/LoginForm'
 import UserProfile from '@/components/UserProfile'
 import FirestoreDemo from '@/components/FirestoreDemo'
+import NanoBananaImageUploader from '@/components/NanoBananaImageUploader'
 
 export default function Home() {
   const { user } = useAuth()
@@ -57,6 +58,7 @@ export default function Home() {
           <>
             <UserProfile />
             <FirestoreDemo />
+            <NanoBananaImageUploader />
           </>
         )}
 

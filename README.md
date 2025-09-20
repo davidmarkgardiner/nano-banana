@@ -8,6 +8,7 @@ A production-ready Next.js template with Firebase Authentication featuring Googl
 - 🔑 **Email/Password Auth** - Traditional login and registration
 - 🚀 **Google OAuth** - One-click Google sign-in
 - 🗄️ **Firestore Ready** - Database integration prepared
+- 🖼️ **Firebase Storage** - Save Nano Banana images directly to your bucket
 - 🎨 **Modern UI** - Clean design with Tailwind CSS
 - 📱 **Responsive Design** - Mobile-first approach
 - 🌙 **Dark Mode Support** - Automatic theme switching
