@@ -3,8 +3,12 @@
 import { useState, useCallback } from 'react'
 import { UseImageGenerationReturn } from '@/types'
 import nanoBananaAPI from '@/lib/nanoBananaAPI'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '@/lib/firebase'
+import { useAuth } from '@/context/AuthContext'
 
 export function useImageGeneration(): UseImageGenerationReturn {
+  const { user } = useAuth()
   const [prompt, setPrompt] = useState('')
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -29,9 +33,51 @@ export function useImageGeneration(): UseImageGenerationReturn {
     try {
       setIsLoading(true)
       setError(null)
-      
+
       const response = await nanoBananaAPI.generateImage(prompt)
       setGeneratedImage(response.imageUrl)
+
+      // Auto-save to Firebase Storage if user is logged in
+      if (user && response.imageUrl) {
+        try {
+          console.log('Auto-saving image to Firebase Storage...')
+
+          // Fetch the image data using our API endpoint
+          const apiResponse = await fetch('/api/nano-banana-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageUrl: response.imageUrl })
+          })
+
+          if (apiResponse.ok) {
+            const { contentType, data } = await apiResponse.json()
+
+            // Convert base64 to Uint8Array
+            const binaryString = atob(data)
+            const bytes = new Uint8Array(binaryString.length)
+            for (let i = 0; i < binaryString.length; i++) {
+              bytes[i] = binaryString.charCodeAt(i)
+            }
+
+            // Create storage path
+            const now = new Date()
+            const timestamp = now.getTime()
+            const path = `nano-banana/${user.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${timestamp}`
+
+            // Upload to Firebase Storage
+            const storageRef = ref(storage, path)
+            await uploadBytes(storageRef, bytes, { contentType })
+
+            const downloadUrl = await getDownloadURL(storageRef)
+            console.log('Image auto-saved to Firebase Storage:', downloadUrl)
+          } else {
+            console.warn('Failed to fetch image for auto-save:', apiResponse.statusText)
+          }
+        } catch (saveError) {
+          console.error('Auto-save to Firebase Storage failed:', saveError)
+          // Don't show error to user for auto-save failures
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate image')
     } finally {
