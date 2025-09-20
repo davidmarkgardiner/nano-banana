@@ -78,3 +78,5 @@ pids
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts 
+.mcp-SECRETS-DO-NOT-COMMIT.json
+.mcp.json
