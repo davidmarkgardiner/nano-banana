@@ -71,7 +71,7 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
 
   const handleRetry = () => {
     clearError()
-    generateImage()
+    void generateImage()
   }
 
   const handleClear = () => {
@@ -79,8 +79,21 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
   }
 
   const handleSamplePromptSelect = (value: string) => {
+    if (isLoading) {
+      return
+    }
     clearError()
     setPrompt(value)
+    void generateImage(value)
+  }
+
+  const handlePromptInspirationUse = (value: string) => {
+    if (isLoading) {
+      return
+    }
+    clearError()
+    setPrompt(value)
+    void generateImage(value)
   }
 
   const shouldShowTips = !generatedImage && !isLoading
@@ -126,7 +139,7 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               ))}
             </div>
 
-            <PromptInspiration onUsePrompt={setPrompt} isGenerating={isLoading} />
+            <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} />
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left shadow-lg backdrop-blur-xl">
               <div className="flex items-center justify-between gap-2">
