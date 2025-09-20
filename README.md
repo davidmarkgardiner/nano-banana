@@ -39,7 +39,7 @@ npm install
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your Firebase credentials:
+Edit `.env.local` with your Firebase credentials and deployment settings:
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
@@ -48,6 +48,9 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+GEMINI_API_KEY=your_gemini_api_key_here
+NEXT_PUBLIC_USE_REAL_API=false
+NEXT_PUBLIC_APP_URL=https://your-vercel-project-url.vercel.app
 ```
 
 ### 3. Firebase Setup
@@ -64,6 +67,18 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+## ☁️ Deploy to Vercel
+
+The project ships with a ready-to-use [`vercel.json`](vercel.json) configuration and a curated [deployment guide](docs/deployment/vercel.md).
+
+1. [Create or log in to a Vercel account](https://vercel.com/).
+2. Import this repository from your Git provider. Vercel will auto-detect the Next.js framework and suggested build settings.
+3. Add the environment variables from `.env.local` (see table in the deployment guide). Include `NEXT_PUBLIC_APP_URL` with your production domain and enable `NEXT_PUBLIC_USE_REAL_API=true` only when your Gemini API key is active.
+4. Deploy the project. Vercel will provide a preview URL and, once promoted, a production domain.
+5. Optionally deploy via the Vercel CLI (`vercel --prod`) to trigger new builds from your terminal.
+
+> ℹ️ The [`.vercelignore`](.vercelignore) file keeps local tooling assets and large screenshots out of your deployment bundle. Customize it if you need to ship additional static assets.
 
 ## 📁 Project Structure
 

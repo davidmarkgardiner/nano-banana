@@ -1,0 +1,38 @@
+# Ignore files that should not be uploaded to Vercel
+
+# Environment and secrets
+.env
+.env.*
+*.local
+*.env
+
+# Dependencies
+node_modules
+
+# Build and test artifacts
+coverage
+playwright-report
+playwright/.cache
+.test-results
+/tmp
+
+# Local tooling directories
+.bmad-core
+.cursor
+.taskmaster
+.qoder
+.turbo
+
+# Repository-specific documentation and assets not required at runtime
+agentic-docs
+agents
+quick-check.png
+refresh-test-*.png
+demo-*-state.png
+manual-verification-screenshot.png
+nano-banana-screenshot.png
+login-page-screenshot.png
+main-page-screenshot.png
+debug-page.png
+test-auth-page-screenshot.png
+app-initial-state.png
