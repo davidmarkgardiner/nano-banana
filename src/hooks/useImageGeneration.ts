@@ -6,6 +6,7 @@ import nanoBananaAPI from '@/lib/nanoBananaAPI'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
+import { useCanvasImage } from '@/context/CanvasImageContext'
 
 const MAX_PROMPT_SLUG_LENGTH = 60
 
@@ -37,6 +38,7 @@ const formatTwoDigits = (value: number): string => value.toString().padStart(2, 
 
 export function useImageGeneration(): UseImageGenerationReturn {
   const { user } = useAuth()
+  const { showGeneratedImage, clearImage } = useCanvasImage()
   const [prompt, setPrompt] = useState('')
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -72,6 +74,9 @@ export function useImageGeneration(): UseImageGenerationReturn {
 
         const response = await nanoBananaAPI.generateImage(sanitizedPrompt)
         setGeneratedImage(response.imageUrl)
+        if (response.imageUrl) {
+          showGeneratedImage(response.imageUrl, sanitizedPrompt)
+        }
 
         // Auto-save to Firebase Storage if user is logged in
         if (user && response.imageUrl) {
@@ -127,7 +132,7 @@ export function useImageGeneration(): UseImageGenerationReturn {
         setIsLoading(false)
       }
     },
-    [prompt, user]
+    [prompt, showGeneratedImage, user]
   )
 
   const clearError = useCallback(() => {
@@ -139,7 +144,8 @@ export function useImageGeneration(): UseImageGenerationReturn {
     setGeneratedImage(null)
     setError(null)
     setIsLoading(false)
-  }, [])
+    clearImage()
+  }, [clearImage])
 
   return {
     prompt,

@@ -7,6 +7,8 @@ import TextPromptInput from '@/components/TextPromptInput'
 import ImageDisplay from '@/components/ImageDisplay'
 import UserHeader from '@/components/UserHeader'
 import PromptInspiration from '@/components/PromptInspiration'
+import { useCanvasImage } from '@/context/CanvasImageContext'
+import { ImageFilter } from '@/lib/imageFilters'
 
 interface ImageGeneratorProps {
   user: User
@@ -46,13 +48,20 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
   const {
     prompt,
     setPrompt,
-    generatedImage,
     isLoading,
     error,
     generateImage,
     clearError,
     reset
   } = useImageGeneration()
+
+  const {
+    currentImage,
+    filter,
+    applyFilter,
+    isProcessing,
+    error: canvasError,
+  } = useCanvasImage()
 
 
   const handleRetry = () => {
@@ -74,7 +83,17 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
     void generateImage(value)
   }
 
-  const shouldShowTips = !generatedImage && !isLoading
+  const shouldShowTips = !currentImage && !isLoading
+
+  const handleFilterChange = async (value: ImageFilter) => {
+    await applyFilter(value)
+  }
+
+  const promptLabel = currentImage?.source === 'uploaded' ? 'Image details' : 'Prompt'
+  const displayPrompt = currentImage
+    ? currentImage.prompt ?? (currentImage.source === 'uploaded' ? 'Uploaded photo' : prompt)
+    : prompt
+  const displayError = [error, canvasError].filter(Boolean).join(' ') || null
 
   return (
     <section className="relative isolate overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100">
@@ -133,23 +152,72 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
             <div className="absolute -inset-10 hidden rounded-[48px] bg-gradient-to-br from-sky-500/20 via-purple-500/10 to-transparent blur-3xl lg:block" />
             <div className="relative w-full">
               <ImageDisplay
-                imageUrl={generatedImage}
+                imageUrl={currentImage?.displayUrl ?? null}
                 isLoading={isLoading}
-                error={error}
-                prompt={prompt}
-                onRetry={handleRetry}
-              onRegenerate={handleRetry}
-                onClear={handleClear}
+                error={displayError}
+                prompt={displayPrompt}
+                promptLabel={promptLabel}
+                onRetry={currentImage?.source === 'generated' ? handleRetry : undefined}
+                onRegenerate={currentImage?.source === 'generated' ? handleRetry : undefined}
+                onClear={currentImage ? handleClear : undefined}
                 variant="hero"
                 className="max-w-none"
               />
 
-              {generatedImage && !isLoading && !error && (
+              {currentImage?.source === 'generated' && !isLoading && !displayError && (
                 <div className="mt-6 flex justify-center lg:justify-end">
                   <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 shadow-[0_20px_60px_-30px_rgba(52,211,153,0.65)]">
                     <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-300" />
                     Image generated successfully!
                   </div>
+                </div>
+              )}
+
+              {currentImage && (
+                <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6 text-left shadow-xl backdrop-blur-2xl">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
+                        Active canvas image
+                      </p>
+                      <h4 className="text-lg font-semibold text-white">
+                        {currentImage.source === 'generated' ? 'AI generated result' : 'Uploaded photo'}
+                      </h4>
+                      <p className="text-sm text-slate-200/70">
+                        Apply creative looks to fine-tune the current image. Changes update instantly in the display above.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <label htmlFor="canvas-filter" className="text-sm font-medium text-slate-200">
+                        Filter
+                      </label>
+                      <select
+                        id="canvas-filter"
+                        value={filter}
+                        onChange={(event) => void handleFilterChange(event.target.value as ImageFilter)}
+                        disabled={isProcessing}
+                        className="min-w-[180px] rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-slate-100 backdrop-blur-lg transition-colors focus:border-white/40 focus:outline-none disabled:opacity-60"
+                      >
+                        <option value="none">Original colors</option>
+                        <option value="grayscale">Dramatic grayscale</option>
+                        <option value="sepia">Warm sepia</option>
+                        <option value="invert">Pop art invert</option>
+                      </select>
+                      {isProcessing && (
+                        <div className="flex items-center gap-2 text-sm text-slate-200/70">
+                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-transparent" />
+                          Applying filter…
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {canvasError && (
+                    <p className="mt-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                      {canvasError}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

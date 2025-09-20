@@ -8,6 +8,7 @@ interface ImageDisplayProps {
   isLoading: boolean
   error: string | null
   prompt: string
+  promptLabel?: string
   onRetry?: () => void
   onRegenerate?: () => void
   onClear?: () => void
@@ -20,6 +21,7 @@ export default function ImageDisplay({
   isLoading,
   error,
   prompt,
+  promptLabel,
   onRetry,
   onRegenerate,
   onClear,
@@ -108,6 +110,7 @@ export default function ImageDisplay({
     : 'mt-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700'
 
   const promptLabelClass = isHero ? 'font-semibold text-white' : 'font-medium'
+  const promptTitle = promptLabel ?? 'Prompt'
 
   const emptyFrameClass = isHero
     ? 'relative aspect-[3/4] sm:aspect-[4/5] lg:aspect-[5/6] overflow-hidden rounded-3xl border-2 border-dashed border-white/25 bg-white/5 backdrop-blur-2xl shadow-[0_30px_100px_-45px_rgba(59,130,246,0.5)]'
@@ -264,7 +267,7 @@ export default function ImageDisplay({
         {!isImageLoading && !imageError && prompt && (
           <div className={promptInfoClass}>
             <p className="text-sm">
-              <span className={promptLabelClass}>Prompt:</span> {prompt}
+              <span className={promptLabelClass}>{promptTitle}:</span> {prompt}
             </p>
           </div>
         )}
@@ -282,9 +285,9 @@ export default function ImageDisplay({
               <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
             </svg>
           </div>
-          <h3 className={emptyTitleClass}>Your Generated Image</h3>
+          <h3 className={emptyTitleClass}>Your Generated or Uploaded Image</h3>
           <p className={emptyDescriptionClass}>
-            Enter a prompt above and click generate to create your AI image
+            Enter a prompt above, generate an image, or upload your own photo to see it here
           </p>
         </div>
       </div>
