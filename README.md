@@ -5,9 +5,9 @@ A modern web application for generating AI images from text prompts, built with 
 ## ✨ Features
 
 ### Current Features
-- 🔥 **Firebase Authentication** - Complete auth system with email/password and Google OAuth
-- 🔑 **Email/Password Auth** - Traditional login and registration
-- 🚀 **Google OAuth** - One-click Google sign-in
+- 🔥 **Firebase Authentication** - Google-only sign-in with an administrator approval workflow
+- 🛡️ **Admin Approval Queue** - Every new Google login is tracked for manual approval before accessing protected tools
+- 🚀 **Google OAuth** - One-click Google sign-in with Firebase
 - 🗄️ **Firestore Database** - Real-time data storage and retrieval
 - 🖼️ **Firebase Storage** - Save Nano Banana images directly to your bucket
 - 🎨 **AI Image Generation** - Generate beautiful images from text prompts
@@ -58,9 +58,10 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ### 3. Firebase Setup
 
 1. Create a project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable Authentication with Email/Password and Google providers
+2. Enable Authentication with the Google provider (email/password is not used)
 3. Create a Firestore database
-4. Copy your configuration to `.env.local`
+4. (Optional) Create a `userApprovals` collection to track admin decisions
+5. Copy your configuration to `.env.local`
 
 ### 4. Run Development Server
 
@@ -115,7 +116,7 @@ npx playwright test  # Run end-to-end tests
 ## 🎨 Image Generation Workflow
 
 ### User Journey
-1. **Authentication** - Users sign in with email/password or Google
+1. **Authentication** - Users sign in with Google and wait for admin approval
 2. **Prompt Input** - Enter descriptive text for image generation
 3. **Generation** - Click generate to create AI image (connects to nano-banana API)
 4. **Display** - View generated image with loading states and error handling

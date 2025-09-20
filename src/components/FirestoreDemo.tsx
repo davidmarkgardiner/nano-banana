@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { FirebaseError } from 'firebase/app'
 import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
@@ -37,11 +38,12 @@ export default function FirestoreDemo() {
   const [clearing, setClearing] = useState(false)
   const [error, setError] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
-  const { user } = useAuth()
+  const { user, approvalStatus } = useAuth()
+  const hasApproval = user && approvalStatus === 'approved'
 
-  const fetchMessages = async () => {
-    if (!db) {
-      setError('Firestore not available')
+  const fetchMessages = useCallback(async () => {
+    if (!hasApproval) {
+      setMessages([])
       return
     }
 
@@ -67,24 +69,19 @@ export default function FirestoreDemo() {
     } catch (error) {
       console.error('Error fetching messages:', error)
       setError('Failed to fetch messages. Please check your connection and try again.')
-      if (error instanceof Error && 'code' in error && (error as { code: string }).code === 'permission-denied') {
+      if (error instanceof FirebaseError && error.code === 'permission-denied') {
         alert('Permission denied. Please ensure you are logged in and Firestore rules are configured correctly.')
       }
     } finally {
       setRefreshing(false)
     }
-  }
+  }, [hasApproval])
 
   const addMessage = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!newMessage.trim() || !user) {
+    if (!newMessage.trim() || !hasApproval || !user) {
       console.log('Missing message or user:', { message: newMessage.trim(), user: user?.uid })
-      return
-    }
-
-    if (!db) {
-      setError('Firestore not available')
       return
     }
 
@@ -110,18 +107,18 @@ export default function FirestoreDemo() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSaveSuccess(false), 3000)
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Error adding message:', error)
       setError('Failed to save message. Please try again.')
-      alert('Failed to add message: ' + (error instanceof Error ? error.message : 'Unknown error'))
+      const message = error instanceof Error ? error.message : 'Unknown error occurred.'
+      alert('Failed to add message: ' + message)
     } finally {
       setLoading(false)
     }
   }
 
   const deleteMessage = async (messageId: string) => {
-    if (!db) {
-      alert('Firestore not available')
+    if (!hasApproval) {
       return
     }
 
@@ -134,8 +131,7 @@ export default function FirestoreDemo() {
   }
 
   const clearMessages = async () => {
-    if (!db) {
-      alert('Firestore not available')
+    if (!hasApproval) {
       return
     }
 
@@ -155,9 +151,9 @@ export default function FirestoreDemo() {
 
   useEffect(() => {
     fetchMessages()
-  }, [])
+  }, [fetchMessages])
 
-  if (!user) {
+  if (!user || !hasApproval) {
     return (
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-slate-100 shadow-xl backdrop-blur-xl">
         <div className="pointer-events-none absolute -top-16 right-0 h-48 w-48 rounded-full bg-indigo-500/20 blur-3xl" />
@@ -165,7 +161,7 @@ export default function FirestoreDemo() {
 
         <div className="relative">
           <h3 className="text-xl font-semibold text-white">Firestore Demo</h3>
-          <p className="mt-3 text-sm text-slate-300">Please login to use the messaging feature.</p>
+          <p className="mt-3 text-sm text-slate-300">Admin approval is required before you can use the messaging feature.</p>
         </div>
       </div>
     )

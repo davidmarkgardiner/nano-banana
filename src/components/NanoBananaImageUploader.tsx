@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
+import Image from 'next/image'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
@@ -24,14 +25,16 @@ const decodeBase64ToUint8Array = (base64Data: string): Uint8Array => {
 }
 
 export default function NanoBananaImageUploader(): JSX.Element | null {
-  const { user } = useAuth()
+  const { user, approvalStatus } = useAuth()
   const [imageUrl, setImageUrl] = useState('')
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const [storagePath, setStoragePath] = useState('')
   const [downloadUrl, setDownloadUrl] = useState('')
 
-  if (!user) {
+  const hasApproval = user && approvalStatus === 'approved'
+
+  if (!user || !hasApproval) {
     return null
   }
 
@@ -40,6 +43,11 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
 
     if (!imageUrl.trim()) {
       setError('Please provide the Nano Banana image URL before uploading.')
+      return
+    }
+
+    if (!storage) {
+      setError('Firebase Storage is not configured. Please contact the administrator.')
       return
     }
 
@@ -146,9 +154,12 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
           </a>
           {downloadUrl && (
             <div className="mt-4">
-              <img
+              <Image
                 src={downloadUrl}
                 alt="Stored Nano Banana preview"
+                width={512}
+                height={512}
+                sizes="(max-width: 768px) 100vw, 512px"
                 className="max-h-64 w-full object-contain rounded-md border border-gray-200 dark:border-gray-700"
               />
             </div>

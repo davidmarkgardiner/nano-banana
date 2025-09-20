@@ -17,7 +17,7 @@ export default function PromptInspiration({ onUsePrompt, isGenerating = false }:
   const initialSuggestion = useMemo(() => getRandomPromptSuggestion(), [])
   const [suggestion, setSuggestion] = useState<string>(initialSuggestion)
   const [source, setSource] = useState<'gemini' | 'fallback'>('fallback')
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [message, setMessage] = useState<string | null>(null)
   const isMountedRef = useRef(true)
 
@@ -48,17 +48,29 @@ export default function PromptInspiration({ onUsePrompt, isGenerating = false }:
         throw new Error('Empty prompt received')
       }
 
+      if (!isMountedRef.current) {
+        return
+      }
+
       setSuggestion(cleaned)
       setSource(data.source)
       setMessage(data.warning ?? null)
     } catch (error) {
       console.error('Failed to load prompt inspiration:', error)
 
+      if (!isMountedRef.current) {
+        return
+      }
+
       const fallbackPrompt = getRandomPromptSuggestion()
       setSuggestion(fallbackPrompt)
       setSource('fallback')
       setMessage('Using a curated prompt while AI suggestions are unavailable.')
     } finally {
+      if (!isMountedRef.current) {
+        return
+      }
+
       setIsLoading(false)
     }
   }, [])
