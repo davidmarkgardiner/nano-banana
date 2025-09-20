@@ -31,8 +31,14 @@ export interface NanoBananaAPIResponse {
   metadata: ImageMetadata
 }
 
+export interface NanoBananaImageEditRequest {
+  imageDataUrl: string
+  instruction: string
+}
+
 export interface NanoBananaAPI {
   generateImage(prompt: string): Promise<NanoBananaAPIResponse>
+  editImage(request: NanoBananaImageEditRequest): Promise<NanoBananaAPIResponse>
 }
 
 export interface PromptSuggestionResponse {

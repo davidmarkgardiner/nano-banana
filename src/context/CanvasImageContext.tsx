@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { applyFilterToImageDataUrl, ImageFilter } from '@/lib/imageFilters'
+import { convertImageUrlToDataUrl } from '@/lib/imageData'
 
 export type CanvasImageSource = 'generated' | 'uploaded'
 
@@ -31,31 +32,6 @@ interface CanvasImageContextValue {
 }
 
 const CanvasImageContext = createContext<CanvasImageContextValue | undefined>(undefined)
-
-const convertUrlToDataUrl = async (url: string): Promise<string> => {
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch the image for processing.')
-  }
-
-  const blob = await response.blob()
-
-  return await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result)
-        return
-      }
-      reject(new Error('Unsupported image format encountered during processing.'))
-    }
-    reader.onerror = () => {
-      reject(new Error('Unable to read the image data for processing.'))
-    }
-    reader.readAsDataURL(blob)
-  })
-}
 
 export function CanvasImageProvider({ children }: { children: React.ReactNode }) {
   const nextIdRef = useRef(1)
@@ -90,7 +66,7 @@ export function CanvasImageProvider({ children }: { children: React.ReactNode })
           baseDataUrl ??
           (image.originalDataUrl
             ? image.originalDataUrl
-            : await convertUrlToDataUrl(image.originalUrl))
+            : await convertImageUrlToDataUrl(image.originalUrl))
 
         const processedDataUrl = await applyFilterToImageDataUrl(sourceDataUrl, nextFilter)
 
