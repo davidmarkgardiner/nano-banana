@@ -1,0 +1,16 @@
+[{
+  "localId": "test-user-123",
+  "email": "test.nanobanan@gmail.com",
+  "emailVerified": true,
+  "displayName": "Test User",
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "lastLoginAt": "2024-01-01T00:00:00.000Z",
+  "customClaims": "{}",
+  "providerUserInfo": [{
+    "providerId": "password",
+    "email": "test.nanobanan@gmail.com",
+    "federatedId": "test.nanobanan@gmail.com",
+    "displayName": "Test User",
+    "photoUrl": ""
+  }]
+}]
