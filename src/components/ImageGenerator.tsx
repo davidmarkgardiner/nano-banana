@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { FormEvent, ChangeEvent, useState } from 'react'
 import { User } from 'firebase/auth'
 import { useImageGeneration } from '@/hooks/useImageGeneration'
 import TextPromptInput from '@/components/TextPromptInput'
@@ -9,6 +9,7 @@ import UserHeader from '@/components/UserHeader'
 import PromptInspiration from '@/components/PromptInspiration'
 import { useCanvasImage } from '@/context/CanvasImageContext'
 import { ImageFilter } from '@/lib/imageFilters'
+import { useImageRemix } from '@/hooks/useImageRemix'
 
 interface ImageGeneratorProps {
   user: User
@@ -63,6 +64,16 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
     error: canvasError,
   } = useCanvasImage()
 
+  const {
+    instruction,
+    setInstruction,
+    isRemixing,
+    error: remixError,
+    lastInstruction,
+    remixImage,
+    clearError: clearRemixError,
+  } = useImageRemix()
+
 
   const handleRetry = () => {
     clearError()
@@ -94,6 +105,20 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
     ? currentImage.prompt ?? (currentImage.source === 'uploaded' ? 'Uploaded photo' : prompt)
     : prompt
   const displayError = [error, canvasError].filter(Boolean).join(' ') || null
+
+  const handleInstructionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    if (remixError) {
+      clearRemixError()
+    }
+    setInstruction(event.target.value)
+  }
+
+  const handleRemixSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    await remixImage()
+  }
+
+  const isRemixDisabled = isLoading || isProcessing || isRemixing
 
   return (
     <section className="relative isolate overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100">
@@ -175,49 +200,105 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
 
               {currentImage && (
                 <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6 text-left shadow-xl backdrop-blur-2xl">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
-                        Active canvas image
-                      </p>
-                      <h4 className="text-lg font-semibold text-white">
-                        {currentImage.source === 'generated' ? 'AI generated result' : 'Uploaded photo'}
-                      </h4>
-                      <p className="text-sm text-slate-200/70">
-                        Apply creative looks to fine-tune the current image. Changes update instantly in the display above.
-                      </p>
-                    </div>
+                  <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                    <div className="space-y-4">
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
+                          Active canvas image
+                        </p>
+                        <h4 className="text-lg font-semibold text-white">
+                          {currentImage.source === 'generated' ? 'AI generated result' : 'Uploaded photo'}
+                        </h4>
+                        <p className="text-sm text-slate-200/70">
+                          Apply creative looks or send the canvas to Nano Banana for bespoke edits.
+                        </p>
+                      </div>
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <label htmlFor="canvas-filter" className="text-sm font-medium text-slate-200">
-                        Filter
-                      </label>
-                      <select
-                        id="canvas-filter"
-                        value={filter}
-                        onChange={(event) => void handleFilterChange(event.target.value as ImageFilter)}
-                        disabled={isProcessing}
-                        className="min-w-[180px] rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-slate-100 backdrop-blur-lg transition-colors focus:border-white/40 focus:outline-none disabled:opacity-60"
-                      >
-                        <option value="none">Original colors</option>
-                        <option value="grayscale">Dramatic grayscale</option>
-                        <option value="sepia">Warm sepia</option>
-                        <option value="invert">Pop art invert</option>
-                      </select>
-                      {isProcessing && (
-                        <div className="flex items-center gap-2 text-sm text-slate-200/70">
-                          <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-transparent" />
-                          Applying filter…
-                        </div>
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <label htmlFor="canvas-filter" className="text-sm font-medium text-slate-200">
+                          Filter
+                        </label>
+                        <select
+                          id="canvas-filter"
+                          value={filter}
+                          onChange={(event) => void handleFilterChange(event.target.value as ImageFilter)}
+                          disabled={isProcessing}
+                          className="min-w-[180px] rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-slate-100 backdrop-blur-lg transition-colors focus:border-white/40 focus:outline-none disabled:opacity-60"
+                        >
+                          <option value="none">Original colors</option>
+                          <option value="grayscale">Dramatic grayscale</option>
+                          <option value="sepia">Warm sepia</option>
+                          <option value="invert">Pop art invert</option>
+                        </select>
+                        {isProcessing && (
+                          <div className="flex items-center gap-2 text-sm text-slate-200/70">
+                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-transparent" />
+                            Applying filter…
+                          </div>
+                        )}
+                      </div>
+
+                      {canvasError && (
+                        <p className="rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
+                          {canvasError}
+                        </p>
                       )}
                     </div>
-                  </div>
 
-                  {canvasError && (
-                    <p className="mt-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
-                      {canvasError}
-                    </p>
-                  )}
+                    <form onSubmit={handleRemixSubmit} className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_-30px_rgba(59,130,246,0.45)] backdrop-blur-xl">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
+                        <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                        Nano Banana edits
+                      </div>
+                      <h5 className="mt-3 text-lg font-semibold text-white">Describe the changes you need</h5>
+                      <p className="mt-2 text-sm text-slate-200/70">
+                        Tell Nano Banana what to adjust—like changing hat colors, swapping props, or updating the background. The current canvas is sent along with your instruction.
+                      </p>
+
+                      <label htmlFor="nano-banana-instruction" className="sr-only">
+                        Editing instructions
+                      </label>
+                      <textarea
+                        id="nano-banana-instruction"
+                        value={instruction}
+                        onChange={handleInstructionChange}
+                        placeholder="Example: make the hat black and replace the flowers with bananas"
+                        rows={4}
+                        className="mt-4 w-full resize-none rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/30 focus:outline-none"
+                        disabled={isRemixDisabled}
+                      />
+
+                      {remixError && (
+                        <p className="mt-3 rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-100">
+                          {remixError}
+                        </p>
+                      )}
+
+                      {lastInstruction && !remixError && !instruction && (
+                        <p className="mt-3 text-xs text-slate-300/70">
+                          Last instruction applied: <span className="font-medium text-slate-100">{lastInstruction}</span>
+                        </p>
+                      )}
+
+                      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <button
+                          type="submit"
+                          disabled={isRemixDisabled}
+                          className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/20 px-5 py-2 text-sm font-semibold text-emerald-100 transition-all hover:border-emerald-400 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isRemixing && (
+                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-200 border-t-transparent" />
+                          )}
+                          {isRemixing ? 'Sending to Nano Banana…' : 'Apply Nano Banana edit'}
+                        </button>
+                        <p className="text-xs text-slate-300/70">
+                          {isRemixing
+                            ? 'Nano Banana is working on the transformation…'
+                            : 'Edits typically take a few seconds.'}
+                        </p>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               )}
             </div>
