@@ -5,6 +5,7 @@ import { useImageGeneration } from '@/hooks/useImageGeneration'
 import TextPromptInput from '@/components/TextPromptInput'
 import ImageDisplay from '@/components/ImageDisplay'
 import UserHeader from '@/components/UserHeader'
+import PromptInspiration from '@/components/PromptInspiration'
 
 interface ImageGeneratorProps {
   user: User
@@ -53,13 +54,16 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
 
           {/* Input Section */}
           <div className="flex justify-center">
-            <TextPromptInput
-              value={prompt}
-              onChange={setPrompt}
-              onSubmit={generateImage}
-              isLoading={isLoading}
-              error={error}
-            />
+            <div className="w-full max-w-3xl space-y-4">
+              <PromptInspiration onUsePrompt={setPrompt} isGenerating={isLoading} />
+              <TextPromptInput
+                value={prompt}
+                onChange={setPrompt}
+                onSubmit={generateImage}
+                isLoading={isLoading}
+                error={error}
+              />
+            </div>
           </div>
 
           {/* Image Display Section */}
