@@ -5,7 +5,7 @@ import { useState, KeyboardEvent } from 'react'
 interface TextPromptInputProps {
   value: string
   onChange: (value: string) => void
-  onSubmit: () => void
+  onSubmit: () => void | Promise<void>
   isLoading: boolean
   error: string | null
   maxLength?: number
