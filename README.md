@@ -5,8 +5,13 @@ A modern web application for generating AI images from text prompts, built with 
 ## ✨ Features
 
 ### Current Features
-- 🔥 **Firebase Authentication** - Secure user accounts with email/password and Google OAuth
-- 🎨 **Modern UI** - Clean, responsive design with Tailwind CSS
+- 🔥 **Firebase Authentication** - Complete auth system with email/password and Google OAuth
+- 🔑 **Email/Password Auth** - Traditional login and registration
+- 🚀 **Google OAuth** - One-click Google sign-in
+- 🗄️ **Firestore Database** - Real-time data storage and retrieval
+- 🖼️ **Firebase Storage** - Save Nano Banana images directly to your bucket
+- 🎨 **AI Image Generation** - Generate beautiful images from text prompts
+- 🎨 **Modern UI** - Clean, responsive glassmorphic design with Tailwind CSS
 - 🌙 **Dark Mode Support** - Automatic theme switching
 - 📱 **Responsive Design** - Mobile-first approach that works on all devices
 - 🔒 **TypeScript** - Full type safety and better developer experience
