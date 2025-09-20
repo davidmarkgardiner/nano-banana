@@ -22,6 +22,7 @@ export default function FirestoreDemo() {
 
   const fetchMessages = async () => {
     try {
+      console.log('Fetching messages...')
       const q = query(collection(db, 'messages'), orderBy('timestamp', 'desc'))
       const querySnapshot = await getDocs(q)
       const messageList: Message[] = []
@@ -33,30 +34,43 @@ export default function FirestoreDemo() {
         } as Message)
       })
 
+      console.log('Fetched messages:', messageList.length)
       setMessages(messageList)
     } catch (error) {
       console.error('Error fetching messages:', error)
+      if ((error as any).code === 'permission-denied') {
+        alert('Permission denied. Please ensure you are logged in and Firestore rules are configured correctly.')
+      }
     }
   }
 
   const addMessage = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!newMessage.trim() || !user) return
+    if (!newMessage.trim() || !user) {
+      console.log('Missing message or user:', { message: newMessage.trim(), user: user?.uid })
+      return
+    }
 
     try {
       setLoading(true)
-      await addDoc(collection(db, 'messages'), {
+      console.log('Adding message with user:', user.uid)
+
+      const docData = {
         text: newMessage,
         timestamp: new Date(),
         userId: user.uid,
-        userEmail: user.email
-      })
+        userEmail: user.email || 'unknown@example.com'
+      }
+
+      console.log('Document data:', docData)
+      await addDoc(collection(db, 'messages'), docData)
 
       setNewMessage('')
       await fetchMessages()
     } catch (error) {
       console.error('Error adding message:', error)
+      alert('Failed to add message: ' + (error as any).message)
     } finally {
       setLoading(false)
     }
