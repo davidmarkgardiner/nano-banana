@@ -1,0 +1,330 @@
+'use client'
+
+import { ChangeEvent, FormEvent, useMemo, useState } from 'react'
+import Image from 'next/image'
+import { useImageTransfusion } from '@/hooks/useImageTransfusion'
+
+interface ImageTransfusionPanelProps {
+  className?: string
+}
+
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
+
+const instructionSuggestions = [
+  'Match the necklaces so both people wear the same piece of jewelry.',
+  'Give the person in the base photo the same ring as the reference image.',
+  'Transfer the hairstyle and accessories from the reference to the base photo.',
+]
+
+const readFileAsDataUrl = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result)
+        return
+      }
+      reject(new Error('Unsupported image format encountered during upload.'))
+    }
+    reader.onerror = () => reject(new Error('Unable to read the selected image. Please try again.'))
+    reader.readAsDataURL(file)
+  })
+
+export default function ImageTransfusionPanel({ className = '' }: ImageTransfusionPanelProps) {
+  const { transfuse, isTransfusing, error, clearError, lastInstruction } = useImageTransfusion()
+  const [basePreview, setBasePreview] = useState<string | null>(null)
+  const [referencePreview, setReferencePreview] = useState<string | null>(null)
+  const [baseName, setBaseName] = useState('')
+  const [referenceName, setReferenceName] = useState('')
+  const [instruction, setInstruction] = useState('Match the accessories between these two photos so they share the same style.')
+  const [localError, setLocalError] = useState<string | null>(null)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
+  const [isBaseLoading, setIsBaseLoading] = useState(false)
+  const [isReferenceLoading, setIsReferenceLoading] = useState(false)
+
+  const canSubmit = useMemo(() => {
+    return Boolean(basePreview && referencePreview && instruction.trim().length >= 3 && !isBaseLoading && !isReferenceLoading)
+  }, [basePreview, referencePreview, instruction, isBaseLoading, isReferenceLoading])
+
+  const resetStatus = () => {
+    setStatusMessage(null)
+    setLocalError(null)
+    if (error) {
+      clearError()
+    }
+  }
+
+  const handleBaseChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null
+    resetStatus()
+
+    if (!file) {
+      setBasePreview(null)
+      setBaseName('')
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setLocalError('The base photo must be an image file.')
+      return
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setLocalError('Please choose a base photo that is 10MB or smaller.')
+      return
+    }
+
+    try {
+      setIsBaseLoading(true)
+      const dataUrl = await readFileAsDataUrl(file)
+      setBasePreview(dataUrl)
+      setBaseName(file.name)
+    } catch (readError) {
+      console.error('Failed to read base photo:', readError)
+      setLocalError(readError instanceof Error ? readError.message : 'Failed to read the base photo.')
+    } finally {
+      setIsBaseLoading(false)
+    }
+  }
+
+  const handleReferenceChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null
+    resetStatus()
+
+    if (!file) {
+      setReferencePreview(null)
+      setReferenceName('')
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setLocalError('The reference photo must be an image file.')
+      return
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setLocalError('Please choose a reference photo that is 10MB or smaller.')
+      return
+    }
+
+    try {
+      setIsReferenceLoading(true)
+      const dataUrl = await readFileAsDataUrl(file)
+      setReferencePreview(dataUrl)
+      setReferenceName(file.name)
+    } catch (readError) {
+      console.error('Failed to read reference photo:', readError)
+      setLocalError(readError instanceof Error ? readError.message : 'Failed to read the reference photo.')
+    } finally {
+      setIsReferenceLoading(false)
+    }
+  }
+
+  const handleInstructionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    if (error) {
+      clearError()
+    }
+    setStatusMessage(null)
+    setLocalError(null)
+    setInstruction(event.target.value)
+  }
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInstruction(suggestion)
+    setStatusMessage(null)
+    setLocalError(null)
+    if (error) {
+      clearError()
+    }
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!basePreview || !referencePreview) {
+      setLocalError('Select both photos before sending them to Nano Banana.')
+      return
+    }
+
+    const trimmedInstruction = instruction.trim()
+
+    if (trimmedInstruction.length < 3) {
+      setLocalError('Add a short description of how the photos should match before submitting.')
+      return
+    }
+
+    setLocalError(null)
+    setStatusMessage(null)
+
+    const response = await transfuse({
+      baseImageDataUrl: basePreview,
+      referenceImageDataUrl: referencePreview,
+      instruction: trimmedInstruction,
+    })
+
+    if (response) {
+      setStatusMessage('Transfusion complete! The updated image has been loaded onto the canvas.')
+    }
+  }
+
+  return (
+    <section
+      className={`rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-2xl ${className}`.trim()}
+    >
+      <div className="flex flex-col gap-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">Nano Banana transfusion</p>
+          <h3 className="mt-3 text-2xl font-semibold text-white">Blend two photos with matching accessories</h3>
+          <p className="mt-2 text-sm text-slate-200/80">
+            Upload a base photo and a reference photo. Nano Banana will merge the reference details—like necklaces, rings, or
+            hairstyles—into the base image.
+          </p>
+        </div>
+
+        {(localError || error || statusMessage) && (
+          <div className="space-y-2">
+            {statusMessage && (
+              <p className="rounded-2xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-100">
+                {statusMessage}
+              </p>
+            )}
+            {(localError || error) && (
+              <p className="rounded-2xl border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-100">
+                {localError || error}
+              </p>
+            )}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label htmlFor="base-photo" className="text-sm font-semibold text-slate-100">
+                  Base photo
+                </label>
+                {baseName && (
+                  <span className="text-xs text-slate-300/80">{baseName}</span>
+                )}
+              </div>
+              <input
+                id="base-photo"
+                type="file"
+                accept="image/*"
+                onChange={handleBaseChange}
+                disabled={isTransfusing}
+                className="w-full cursor-pointer rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-sm text-slate-100 file:mr-4 file:rounded-full file:border-0 file:bg-sky-500/20 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-sky-100 hover:border-white/40"
+              />
+              <p className="text-xs text-slate-300/70">This is the photo that will receive the new accessories.</p>
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                <div className="relative aspect-square w-full">
+                  {basePreview ? (
+                    <Image
+                      src={basePreview}
+                      alt="Base photo preview"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                      {isBaseLoading ? 'Loading…' : 'Select a base photo'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label htmlFor="reference-photo" className="text-sm font-semibold text-slate-100">
+                  Reference photo
+                </label>
+                {referenceName && (
+                  <span className="text-xs text-slate-300/80">{referenceName}</span>
+                )}
+              </div>
+              <input
+                id="reference-photo"
+                type="file"
+                accept="image/*"
+                onChange={handleReferenceChange}
+                disabled={isTransfusing}
+                className="w-full cursor-pointer rounded-2xl border border-dashed border-white/20 bg-white/5 px-4 py-3 text-sm text-slate-100 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-500/20 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-100 hover:border-white/40"
+              />
+              <p className="text-xs text-slate-300/70">Nano Banana copies details from this photo into the base image.</p>
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                <div className="relative aspect-square w-full">
+                  {referencePreview ? (
+                    <Image
+                      src={referencePreview}
+                      alt="Reference photo preview"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
+                      {isReferenceLoading ? 'Loading…' : 'Select a reference photo'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label htmlFor="transfusion-instruction" className="text-sm font-semibold text-slate-100">
+              Describe the transfusion
+            </label>
+            <textarea
+              id="transfusion-instruction"
+              value={instruction}
+              onChange={handleInstructionChange}
+              rows={4}
+              className="w-full resize-none rounded-2xl border border-white/10 bg-slate-950/30 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-400 focus:border-white/30 focus:outline-none"
+              placeholder="Example: Give the first photo the same necklace and earrings as the second."
+              disabled={isTransfusing}
+            />
+            <div className="flex flex-wrap gap-2">
+              {instructionSuggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium text-slate-100 transition hover:border-white/40 hover:bg-white/20"
+                  disabled={isTransfusing}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+            {lastInstruction && !error && !localError && !statusMessage && (
+              <p className="text-xs text-slate-300/70">
+                Last transfusion instruction: <span className="font-medium text-slate-100">{lastInstruction}</span>
+              </p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="submit"
+              disabled={!canSubmit || isTransfusing}
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/20 px-6 py-2 text-sm font-semibold text-emerald-100 transition hover:border-emerald-400 hover:bg-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isTransfusing && (
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-emerald-200 border-t-transparent" />
+              )}
+              {isTransfusing ? 'Sending to Nano Banana…' : 'Blend the photos'}
+            </button>
+            <p className="text-xs text-slate-300/70">
+              {isTransfusing ? 'Nano Banana is matching the photos…' : 'The result appears on the main canvas when complete.'}
+            </p>
+          </div>
+        </form>
+      </div>
+    </section>
+  )
+}
