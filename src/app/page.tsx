@@ -6,13 +6,14 @@ import ImageGenerator from '@/components/ImageGenerator'
 import FirestoreDemo from '@/components/FirestoreDemo'
 import UserProfile from '@/components/UserProfile'
 import NanoBananaImageUploader from '@/components/NanoBananaImageUploader'
+import PendingApprovalNotice from '@/components/PendingApprovalNotice'
 
 const features = [
   {
     icon: '🔐',
     title: 'Authentication Flows',
     description:
-      'Email/password accounts with Google sign-in ready to wire up so you can focus on your product onboarding.',
+      'Google sign-in with admin approvals keeps the canvas secure without managing local passwords or accounts.',
   },
   {
     icon: '🎨',
@@ -34,34 +35,18 @@ const features = [
   },
 ]
 
-const statusItems = [
-  {
-    label: 'Authentication',
-    detail: 'Connected',
-  },
-  {
-    label: 'Firestore',
-    detail: 'Synced',
-  },
-  {
-    label: 'AI Generation',
-    detail: 'Ready',
-  },
-  {
-    label: 'Hosting',
-    detail: 'Ready to deploy',
-  },
-]
-
 export default function Home() {
-  const { user, loading, logout } = useAuth()
+  const { user, loading, logout, approvalStatus, approvalLoading } = useAuth()
 
-  if (loading) {
+  const isApproved = Boolean(user && approvalStatus === 'approved')
+  const awaitingApproval = Boolean(user && approvalStatus !== 'approved')
+
+  if (loading || approvalLoading) {
     return (
       <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-300">Checking your access…</p>
         </div>
       </main>
     )
@@ -69,8 +54,33 @@ export default function Home() {
 
   const wrapperClassName = [
     'relative mx-auto flex max-w-6xl flex-col px-6 pb-24 lg:px-12',
-    user ? 'pt-16' : 'pt-24'
+    isApproved ? 'pt-16' : 'pt-24'
   ].join(' ')
+
+  const statusItems = [
+    {
+      label: 'Authentication',
+      detail: approvalLoading
+        ? 'Verifying…'
+        : isApproved
+          ? 'Approved'
+          : user
+            ? 'Awaiting approval'
+            : 'Google sign-in ready',
+    },
+    {
+      label: 'Firestore',
+      detail: isApproved ? 'Synced' : 'Requires approval',
+    },
+    {
+      label: 'AI Generation',
+      detail: isApproved ? 'Ready' : 'Locked',
+    },
+    {
+      label: 'Hosting',
+      detail: 'Ready to deploy',
+    },
+  ]
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
@@ -80,7 +90,7 @@ export default function Home() {
         <div className="absolute -bottom-24 right-0 h-[420px] w-[420px] rounded-full bg-purple-500/20 blur-3xl" />
       </div>
 
-      {user && <ImageGenerator user={user} onLogout={logout} />}
+      {isApproved && user && <ImageGenerator user={user} onLogout={logout} />}
 
       <div className={wrapperClassName}>
         {!user && (
@@ -92,14 +102,14 @@ export default function Home() {
               Bring your ideas to life with the Nano Banana AI canvas
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300 sm:text-xl">
-              Sign in to describe your dream scene and watch the generator fill the screen with rich, download-ready artwork in seconds.
+              Sign in with Google to describe your dream scene and watch the generator fill the screen with rich, download-ready artwork in seconds.
             </p>
             <div className="mt-10 flex flex-wrap justify-center gap-4">
               <a
                 href="#auth"
                 className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition-transform hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-500/40"
               >
-                Sign in to generate
+                Request access
               </a>
               <a
                 href="#features"
@@ -113,7 +123,7 @@ export default function Home() {
 
         <section
           id="features"
-          className={`${user ? 'mt-16' : 'mt-20'} grid gap-6 sm:grid-cols-2 xl:grid-cols-4`}
+          className={`${isApproved ? 'mt-16' : 'mt-20'} grid gap-6 sm:grid-cols-2 xl:grid-cols-4`}
         >
           {features.map((feature) => (
             <article
@@ -134,6 +144,10 @@ export default function Home() {
           {!user ? (
             <div className="mx-auto max-w-2xl">
               <LoginForm />
+            </div>
+          ) : awaitingApproval ? (
+            <div className="mx-auto max-w-3xl">
+              <PendingApprovalNotice />
             </div>
           ) : (
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
@@ -158,7 +172,7 @@ export default function Home() {
                 Powerful building blocks for your AI-powered app
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300">
-                Secure authentication flows, AI image generation, and Firestore data storage with instant feedback. Everything is wired for rapid iteration and beautiful user experiences.
+                Secure Google authentication, admin-reviewed access, AI image generation, and Firestore data storage with instant feedback. Everything is wired for rapid iteration and beautiful user experiences.
               </p>
               <dl className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-2 max-w-3xl mx-auto">
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-slate-200">
@@ -198,7 +212,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
       </div>
     </main>
   )

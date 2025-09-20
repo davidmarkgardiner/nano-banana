@@ -185,6 +185,7 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               error={error}
               prompt={prompt}
               onRetry={handleRetry}
+              onRegenerate={handleRetry}
               onClear={handleClear}
               variant="hero"
             />

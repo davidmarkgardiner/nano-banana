@@ -4,18 +4,17 @@ import { NanoBananaAPI, NanoBananaAPIResponse } from '@/types'
 // This will be replaced with actual API integration later
 class MockNanoBananaAPI implements NanoBananaAPI {
   async generateImage(prompt: string): Promise<NanoBananaAPIResponse> {
-    console.log('Mock API: Generating image for prompt:', prompt)
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000))
-    
+
     // Simulate occasional errors for testing
     if (Math.random() < 0.1) {
       throw new Error('Failed to generate image. Please try again.')
     }
-    
+
     // Return mock data with placeholder image
     const mockImageId = Math.random().toString(36).substring(7)
-    
+
     return {
       imageUrl: `https://picsum.photos/512/512?random=${mockImageId}`,
       id: mockImageId,
@@ -25,7 +24,8 @@ class MockNanoBananaAPI implements NanoBananaAPI {
           width: 512,
           height: 512
         },
-        generatedAt: new Date()
+        generatedAt: new Date(),
+        prompt,
       }
     }
   }

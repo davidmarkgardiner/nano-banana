@@ -9,6 +9,7 @@ interface ImageDisplayProps {
   error: string | null
   prompt: string
   onRetry?: () => void
+  onRegenerate?: () => void
   onClear?: () => void
   className?: string
   variant?: 'default' | 'hero'
@@ -20,6 +21,7 @@ export default function ImageDisplay({
   error,
   prompt,
   onRetry,
+  onRegenerate,
   onClear,
   className,
   variant = 'default'
@@ -85,10 +87,6 @@ export default function ImageDisplay({
   const overlayIconWrapperClass = isHero ? 'text-slate-200/70 mb-2' : 'text-gray-400 dark:text-gray-500 mb-2'
   const overlayTextClass = isHero ? 'text-sm text-slate-200/80' : 'text-sm text-gray-500 dark:text-gray-400'
 
-  const actionOverlayClass = isHero
-    ? 'absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/60 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100'
-    : 'absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100'
-
   const downloadButtonClass = isHero
     ? 'px-4 py-2 rounded-full border border-white/30 bg-white/20 text-sm font-medium text-white backdrop-blur-lg transition-all hover:border-white hover:bg-white/30 flex items-center gap-2'
     : 'px-3 py-2 bg-white/90 hover:bg-white text-gray-800 rounded-lg transition-colors flex items-center gap-1 text-sm'
@@ -96,6 +94,14 @@ export default function ImageDisplay({
   const clearButtonClass = isHero
     ? 'px-4 py-2 rounded-full border border-rose-300/50 bg-rose-500/20 text-sm font-medium text-rose-100 transition-all hover:bg-rose-500/30 flex items-center gap-2'
     : 'px-3 py-2 bg-red-600/90 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-1 text-sm'
+
+  const regenerateButtonClass = isHero
+    ? 'px-4 py-2 rounded-full border border-sky-300/50 bg-sky-500/20 text-sm font-medium text-sky-100 transition-all hover:bg-sky-500/30 flex items-center gap-2'
+    : 'px-3 py-2 bg-blue-600/90 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-1 text-sm'
+
+  const actionBarClass = isHero
+    ? 'mt-4 flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center'
+    : 'mt-3 flex flex-wrap items-center justify-center gap-2'
 
   const promptInfoClass = isHero
     ? 'mt-4 rounded-2xl border border-white/10 bg-white/10 p-4 text-sm text-slate-100 backdrop-blur-xl shadow-[0_20px_60px_-30px_rgba(56,189,248,0.6)]'
@@ -153,10 +159,12 @@ export default function ImageDisplay({
   }
 
   // Generated Image State
+  const handleRegenerate = onRegenerate ?? onRetry
+
   if (imageUrl) {
     return (
       <div className={containerClassName}>
-        <div className={`${baseFrameClass} group`}>
+        <div className={baseFrameClass}>
           {/* Image Loading Overlay */}
           {isImageLoading && <div className={overlayBackgroundClass}></div>}
 
@@ -197,38 +205,60 @@ export default function ImageDisplay({
             />
           )}
 
-          {/* Hover Overlay with Actions */}
-          {!isImageLoading && !imageError && (
-            <div className={actionOverlayClass}>
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <button
-                  onClick={() => {
-                    const link = document.createElement('a')
-                    link.href = imageUrl
-                    link.download = `nano-banana-${Date.now()}.jpg`
-                    link.click()
-                  }}
-                  className={downloadButtonClass}
-                  title="Download image"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Download
-                </button>
-
-                {onClear && (
-                  <button onClick={onClear} className={clearButtonClass} title="Clear image">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Clear
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
+
+        {!isImageLoading && !imageError && (
+          <div className={actionBarClass}>
+            {handleRegenerate && (
+              <button onClick={handleRegenerate} className={regenerateButtonClass} title="Regenerate image">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m0 0A7 7 0 0112 5c1.513 0 2.924.472 4.082 1.276L20 9m0 0V4h-5m5 5h-.581m0 0A7 7 0 0112 19a7 7 0 01-4.082-1.276L4 15"
+                  />
+                </svg>
+                Regenerate
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                const link = document.createElement('a')
+                link.href = imageUrl
+                link.download = `nano-banana-${Date.now()}.jpg`
+                link.click()
+              }}
+              className={downloadButtonClass}
+              title="Download image"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              Download
+            </button>
+
+            {onClear && (
+              <button onClick={onClear} className={clearButtonClass} title="Clear image">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                Clear
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Image Info */}
         {!isImageLoading && !imageError && prompt && (

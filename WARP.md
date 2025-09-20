@@ -126,12 +126,12 @@ src/
 ### Authentication Flow
 1. **Firebase Setup**: Configuration handled via environment variables
 2. **Context Provider**: `AuthContext` manages authentication state globally
-3. **Multiple Auth Methods**: Email/password and Google OAuth supported
+3. **Google SSO with Admin Approval**: All access flows through Google sign-in and an admin approval queue
 4. **Protected Routes**: Authentication state determines UI rendering
 5. **Error Handling**: Graceful degradation when Firebase not configured
 
 ### Firebase Integration Points
-- **Authentication**: Email/password and Google OAuth via Firebase Auth
+- **Authentication**: Google OAuth via Firebase Auth with approval tracking in Firestore
 - **Firestore**: Ready for database integration (demo component included)
 - **Hosting**: Configured for Firebase static hosting deployment
 - **Security Rules**: Firestore rules configuration in place
@@ -146,7 +146,7 @@ src/
 
 ### Firebase Configuration
 - Project ID: `nano-banana-1758360022` (configured in `.firebaserc`)
-- Authentication providers: Email/Password and Google
+- Authentication providers: Google (email/password disabled)
 - Firestore database ready for integration
 - Hosting configured for static deployment
 
