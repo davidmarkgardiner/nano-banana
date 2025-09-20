@@ -5,6 +5,7 @@ import { useImageGeneration } from '@/hooks/useImageGeneration'
 import TextPromptInput from '@/components/TextPromptInput'
 import ImageDisplay from '@/components/ImageDisplay'
 import UserHeader from '@/components/UserHeader'
+import PromptInspiration from '@/components/PromptInspiration'
 
 interface ImageGeneratorProps {
   user: User
@@ -124,6 +125,8 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
                 </span>
               ))}
             </div>
+
+            <PromptInspiration onUsePrompt={setPrompt} isGenerating={isLoading} />
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left shadow-lg backdrop-blur-xl">
               <div className="flex items-center justify-between gap-2">
