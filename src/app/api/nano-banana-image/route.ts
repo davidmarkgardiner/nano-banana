@@ -13,8 +13,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'imageUrl is required' }, { status: 400 })
     }
 
+    // Handle data URLs (base64 encoded images)
+    if (imageUrl.startsWith('data:')) {
+      const dataUrlRegex = /^data:([^;]+);base64,(.+)$/
+      const match = imageUrl.match(dataUrlRegex)
+
+      if (!match) {
+        return NextResponse.json({ error: 'Invalid data URL format' }, { status: 400 })
+      }
+
+      const [, contentType, base64Data] = match
+      return NextResponse.json({ contentType, data: base64Data })
+    }
+
+    // Handle HTTP/HTTPS URLs
     if (!imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
-      return NextResponse.json({ error: 'imageUrl must be an absolute URL' }, { status: 400 })
+      return NextResponse.json({ error: 'imageUrl must be a data URL or absolute HTTP/HTTPS URL' }, { status: 400 })
     }
 
     const response = await fetch(imageUrl)
