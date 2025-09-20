@@ -66,42 +66,54 @@ export default function Home() {
     )
   }
 
+  const wrapperClassName = [
+    'relative mx-auto flex max-w-6xl flex-col px-6 pb-24 lg:px-12',
+    user ? 'pt-16' : 'pt-24'
+  ].join(' ')
+
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
       <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-32 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-sky-500/20 blur-3xl" />
         <div className="absolute bottom-0 left-1/4 h-[460px] w-[460px] rounded-full bg-indigo-500/20 blur-3xl" />
         <div className="absolute -bottom-24 right-0 h-[420px] w-[420px] rounded-full bg-purple-500/20 blur-3xl" />
       </div>
 
-      <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 pb-24 pt-24 lg:px-12">
-        <section className="text-center">
-          <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-sky-200">
-            🍌 Nano Banana AI
-          </span>
-          <h1 className="mt-8 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
-            AI-powered image generation with Firebase and Next.js
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300 sm:text-xl">
-            Generate stunning images from text prompts with secure authentication, real-time data storage, and modern UI components built for rapid development.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <a
-              href="#auth"
-              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition-transform hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-500/40"
-            >
-              Get started now
-            </a>
-            <a
-              href="#features"
-              className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-slate-200 transition-transform hover:-translate-y-1 hover:border-white/40 hover:text-white"
-            >
-              Explore features
-            </a>
-          </div>
-        </section>
+      {user && <ImageGenerator user={user} onLogout={logout} />}
 
-        <section id="features" className="mt-20 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={wrapperClassName}>
+        {!user && (
+          <section className="text-center">
+            <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-sky-200">
+              🍌 Nano Banana AI
+            </span>
+            <h1 className="mt-8 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+              Bring your ideas to life with the Nano Banana AI canvas
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-300 sm:text-xl">
+              Sign in to describe your dream scene and watch the generator fill the screen with rich, download-ready artwork in seconds.
+            </p>
+            <div className="mt-10 flex flex-wrap justify-center gap-4">
+              <a
+                href="#auth"
+                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition-transform hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-500/40"
+              >
+                Sign in to generate
+              </a>
+              <a
+                href="#features"
+                className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-slate-200 transition-transform hover:-translate-y-1 hover:border-white/40 hover:text-white"
+              >
+                Explore the toolkit
+              </a>
+            </div>
+          </section>
+        )}
+
+        <section
+          id="features"
+          className={`${user ? 'mt-16' : 'mt-20'} grid gap-6 sm:grid-cols-2 xl:grid-cols-4`}
+        >
           {features.map((feature) => (
             <article
               key={feature.title}
@@ -117,18 +129,17 @@ export default function Home() {
           ))}
         </section>
 
-        <section id="auth" className="mt-24 space-y-12">
-          <div className="mx-auto max-w-2xl">
-            {!user ? (
+        <section id="auth" className="mt-24">
+          {!user ? (
+            <div className="mx-auto max-w-2xl">
               <LoginForm />
-            ) : (
-              <div className="space-y-8">
-                <UserProfile />
-                <ImageGenerator user={user} onLogout={logout} />
-                <FirestoreDemo />
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+              <UserProfile />
+              <FirestoreDemo />
+            </div>
+          )}
         </section>
 
         <section className="mt-24">

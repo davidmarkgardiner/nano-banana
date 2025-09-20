@@ -9,6 +9,7 @@ interface TextPromptInputProps {
   isLoading: boolean
   error: string | null
   maxLength?: number
+  className?: string
 }
 
 export default function TextPromptInput({
@@ -17,7 +18,8 @@ export default function TextPromptInput({
   onSubmit,
   isLoading,
   error,
-  maxLength = 500
+  maxLength = 500,
+  className
 }: TextPromptInputProps) {
   const [isFocused, setIsFocused] = useState(false)
 
@@ -40,8 +42,15 @@ export default function TextPromptInput({
   const isNearLimit = characterCount > maxLength * 0.8
   const isOverLimit = characterCount > maxLength
 
+  const containerClassName = [
+    'w-full max-w-2xl mx-auto',
+    className
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className={containerClassName}>
       {/* Input Section */}
       <div className="relative">
         <textarea

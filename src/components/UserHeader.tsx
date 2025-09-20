@@ -6,9 +6,10 @@ import Image from 'next/image'
 interface UserHeaderProps {
   user: User
   onLogout: () => Promise<void>
+  className?: string
 }
 
-export default function UserHeader({ user, onLogout }: UserHeaderProps) {
+export default function UserHeader({ user, onLogout, className }: UserHeaderProps) {
   const handleLogout = async () => {
     try {
       await onLogout()
@@ -17,9 +18,16 @@ export default function UserHeader({ user, onLogout }: UserHeaderProps) {
     }
   }
 
+  const containerClassName = [
+    'w-full max-w-6xl mx-auto mb-8',
+    className
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
-    <div className="w-full max-w-6xl mx-auto mb-8">
-      <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+    <div className={containerClassName}>
+      <div className="flex items-center justify-between rounded-2xl border border-white/15 bg-white/10 p-4 text-slate-100 shadow-xl backdrop-blur-xl dark:border-white/10 dark:bg-white/10">
         {/* User Info */}
         <div className="flex items-center gap-3">
           {/* Profile Picture */}
@@ -41,10 +49,10 @@ export default function UserHeader({ user, onLogout }: UserHeaderProps) {
 
           {/* User Details */}
           <div className="min-w-0">
-            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+            <p className="text-sm font-medium text-white truncate">
               Welcome back{user.displayName ? `, ${user.displayName}` : ''}!
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="text-xs text-slate-200/70 truncate">
               {user.email}
             </p>
           </div>
@@ -53,15 +61,15 @@ export default function UserHeader({ user, onLogout }: UserHeaderProps) {
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Account Badge */}
-          <div className="hidden sm:flex items-center px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-md text-xs font-medium">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+          <div className="hidden sm:flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
+            <div className="mr-1 h-2 w-2 animate-pulse rounded-full bg-emerald-300"></div>
             Active
           </div>
 
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+            className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 transition-colors hover:border-red-400/50 hover:bg-red-500/10 hover:text-red-200"
             title="Sign out"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
