@@ -98,7 +98,14 @@ class NanoBananaAPIClient implements NanoBananaAPI {
         body: JSON.stringify({ prompt })
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (jsonError) {
+        const text = await response.text()
+        console.error('Non-JSON response:', text)
+        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate image')
@@ -126,7 +133,14 @@ class NanoBananaAPIClient implements NanoBananaAPI {
         body: JSON.stringify(request)
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (jsonError) {
+        const text = await response.text()
+        console.error('Non-JSON response:', text)
+        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to edit the image')
@@ -154,7 +168,15 @@ class NanoBananaAPIClient implements NanoBananaAPI {
         body: JSON.stringify(request)
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (jsonError) {
+        // If response is not JSON, get text for better error reporting
+        const text = await response.text()
+        console.error('Non-JSON response:', text)
+        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to transfuse the images')
