@@ -14,8 +14,8 @@ jobs:
       - name: Use Current Branch Deployment URL
         id: constructUrl
         run: |
-          # Use the deployment URL from current branch (temporary fallback)
-          PREVIEW_URL="https://nano-banana-j9ltfdovj-davidmarkgardiners-projects.vercel.app"
+          # Use the main production URL for now (fallback while branch deployments are being fixed)
+          PREVIEW_URL="https://nano-banana-blue.vercel.app"
           echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "Using deployment URL: $PREVIEW_URL"
 
