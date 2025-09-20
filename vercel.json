@@ -6,5 +6,11 @@
   "installCommand": "npm install",
   "github": {
     "silent": true
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main-clean": true,
+      "main": false
+    }
   }
 }
