@@ -97,7 +97,7 @@ export function useImageGeneration(): UseImageGenerationReturn {
             const timestamp = now.getTime()
             const promptSlug = createPromptSlug(prompt)
             const dateSegment = `${now.getFullYear()}-${formatTwoDigits(now.getMonth() + 1)}-${formatTwoDigits(now.getDate())}`
-            const path = `nano-banana/${user.uid}/${dateSegment}-${promptSlug}-${timestamp}`
+            const path = `nano-banana/${dateSegment}/${promptSlug}-${timestamp}`
 
             // Upload to Firebase Storage
             const storageRef = ref(storage, path)

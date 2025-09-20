@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { getRandomPromptSuggestion } from '@/lib/promptSuggestions'
 import type { PromptSuggestionResponse } from '@/types'
 
@@ -17,15 +17,8 @@ export default function PromptInspiration({ onUsePrompt, isGenerating = false }:
   const initialSuggestion = useMemo(() => getRandomPromptSuggestion(), [])
   const [suggestion, setSuggestion] = useState<string>(initialSuggestion)
   const [source, setSource] = useState<'gemini' | 'fallback'>('fallback')
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [message, setMessage] = useState<string | null>(null)
-  const isMountedRef = useRef(true)
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false
-    }
-  }, [])
 
   const fetchSuggestion = useCallback(async () => {
     setIsLoading(true)
@@ -48,36 +41,21 @@ export default function PromptInspiration({ onUsePrompt, isGenerating = false }:
         throw new Error('Empty prompt received')
       }
 
-      if (!isMountedRef.current) {
-        return
-      }
-
       setSuggestion(cleaned)
       setSource(data.source)
       setMessage(data.warning ?? null)
     } catch (error) {
       console.error('Failed to load prompt inspiration:', error)
 
-      if (!isMountedRef.current) {
-        return
-      }
-
       const fallbackPrompt = getRandomPromptSuggestion()
       setSuggestion(fallbackPrompt)
       setSource('fallback')
       setMessage('Using a curated prompt while AI suggestions are unavailable.')
     } finally {
-      if (!isMountedRef.current) {
-        return
-      }
-
       setIsLoading(false)
     }
   }, [])
 
-  useEffect(() => {
-    fetchSuggestion()
-  }, [fetchSuggestion])
 
   const handleUsePrompt = useCallback(() => {
     if (!suggestion || isLoading) {
