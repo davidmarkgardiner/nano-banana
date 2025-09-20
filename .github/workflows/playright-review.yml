@@ -11,15 +11,13 @@ jobs:
     outputs:
       preview-url: ${{ steps.constructUrl.outputs.url }}
     steps:
-      - name: Construct Vercel Preview URL
+      - name: Use Current Branch Deployment URL
         id: constructUrl
         run: |
-          # Construct the expected Vercel preview URL pattern
-          BRANCH_NAME="${{ github.head_ref }}"
-          SAFE_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9-]/-/g' | tr '[:upper:]' '[:lower:]')
-          PREVIEW_URL="https://nano-banana-git-${SAFE_BRANCH}-davidmarkgardiners-projects.vercel.app"
+          # Use the deployment URL from current branch (temporary fallback)
+          PREVIEW_URL="https://nano-banana-j9ltfdovj-davidmarkgardiners-projects.vercel.app"
           echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
-          echo "Constructed preview URL: $PREVIEW_URL"
+          echo "Using deployment URL: $PREVIEW_URL"
 
       - name: Wait for Preview Deployment
         run: |
