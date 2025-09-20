@@ -10,7 +10,8 @@
   "git": {
     "deploymentEnabled": {
       "main-clean": true,
-      "main": true
+      "main": true,
+      "*": true
     }
   }
 }
