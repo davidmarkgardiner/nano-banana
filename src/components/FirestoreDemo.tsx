@@ -51,6 +51,11 @@ export default function FirestoreDemo() {
       setRefreshing(true)
       setError('')  // Clear any existing errors
       console.log('Fetching messages...')
+
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
+
       const q = query(collection(db, 'messages'), orderBy('timestamp', 'desc'))
       const querySnapshot = await getDocs(q)
       const messageList: Message[] = []
@@ -91,6 +96,10 @@ export default function FirestoreDemo() {
       setSaveSuccess(false)
       console.log('Adding message with user:', user.uid)
 
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
+
       const docData = {
         text: newMessage,
         timestamp: new Date(),
@@ -123,6 +132,9 @@ export default function FirestoreDemo() {
     }
 
     try {
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
       await deleteDoc(doc(db, 'messages', messageId))
       await fetchMessages()
     } catch (error) {
@@ -137,6 +149,11 @@ export default function FirestoreDemo() {
 
     try {
       setClearing(true)
+
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
+
       const snapshot = await getDocs(collection(db, 'messages'))
       const deletePromises = snapshot.docs.map((messageDoc) => deleteDoc(messageDoc.ref))
 

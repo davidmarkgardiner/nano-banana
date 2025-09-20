@@ -2,8 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { Timestamp, doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { auth, db, googleProvider } from '@/lib/firebase'
+import { Timestamp } from 'firebase/firestore'
+import { auth, googleProvider } from '@/lib/firebase'
 
 type UserApprovalState = 'pending' | 'approved' | 'rejected'
 export type ApprovalStatus = UserApprovalState | 'unknown'

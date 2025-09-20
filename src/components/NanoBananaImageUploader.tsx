@@ -83,6 +83,10 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       }
 
       const data = (await response.json()) as NanoBananaResponse
+      if (!storage) {
+        throw new Error('Storage not initialized')
+      }
+
       const bytes = decodeBase64ToUint8Array(data.data)
       const now = new Date()
       const path = `nano-banana/${user.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getTime()}`

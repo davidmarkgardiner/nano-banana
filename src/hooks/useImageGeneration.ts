@@ -93,6 +93,11 @@ export function useImageGeneration(): UseImageGenerationReturn {
             }
 
             // Create storage path
+            if (!storage) {
+              console.warn('Storage not initialized, skipping auto-save')
+              return
+            }
+
             const now = new Date()
             const timestamp = now.getTime()
             const promptSlug = createPromptSlug(prompt)
