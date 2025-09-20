@@ -83,7 +83,7 @@ export function useImageGeneration(): UseImageGenerationReturn {
     } finally {
       setIsLoading(false)
     }
-  }, [prompt])
+  }, [prompt, user])
 
   const clearError = useCallback(() => {
     setError(null)
