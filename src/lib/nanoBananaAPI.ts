@@ -88,7 +88,10 @@ class MockNanoBananaAPI implements NanoBananaAPI {
 
 async function parseNanoBananaResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get('content-type') ?? ''
-  const responseText = await response.text()
+
+  // Clone the response to avoid "body stream already read" errors
+  const responseClone = response.clone()
+  const responseText = await responseClone.text()
   const trimmedText = responseText.trim()
   const isJsonResponse = contentType.includes('application/json')
 
