@@ -37,8 +37,8 @@ export function useImageGeneration(): UseImageGenerationReturn {
       const response = await nanoBananaAPI.generateImage(prompt)
       setGeneratedImage(response.imageUrl)
 
-      // Auto-save to Firebase Storage if user is logged in
-      if (user && response.imageUrl) {
+      // Auto-save to Firebase Storage if user is logged in and storage is available
+      if (user && response.imageUrl && storage) {
         try {
           console.log('Auto-saving image to Firebase Storage...')
 
@@ -77,6 +77,8 @@ export function useImageGeneration(): UseImageGenerationReturn {
           console.error('Auto-save to Firebase Storage failed:', saveError)
           // Don't show error to user for auto-save failures
         }
+      } else if (!storage) {
+        console.warn('Firebase Storage not initialized. Skipping auto-save.')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate image')

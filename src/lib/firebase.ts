@@ -1,7 +1,7 @@
-import { initializeApp, getApps } from 'firebase/app'
-import { getAuth, GoogleAuthProvider } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage'
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
+import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth'
+import { getFirestore, type Firestore } from 'firebase/firestore'
+import { getStorage, type FirebaseStorage } from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,28 +13,33 @@ const firebaseConfig = {
 }
 
 // Initialize Firebase
-let firebase_app: any = null
-let auth: any = null
-let db: any = null
-let googleProvider: any = null
+let firebaseApp: FirebaseApp | null = null
+let authInstance: Auth | null = null
+let dbInstance: Firestore | null = null
+let googleAuthProvider: GoogleAuthProvider | null = null
+let storageInstance: FirebaseStorage | null = null
 
 try {
-  firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
 
   // Initialize Firebase Auth and get a reference to the service
-  auth = getAuth(firebase_app)
+  authInstance = getAuth(firebaseApp)
 
   // Initialize Firebase Firestore and get a reference to the service
-  db = getFirestore(firebase_app)
+  dbInstance = getFirestore(firebaseApp)
 
   // Initialize Google Auth Provider
-  googleProvider = new GoogleAuthProvider()
+  googleAuthProvider = new GoogleAuthProvider()
+
+  // Initialize Firebase Storage and get a reference to the service
+  storageInstance = getStorage(firebaseApp)
 } catch (error) {
   console.warn('Firebase initialization failed:', error)
 }
 
-// Initialize Firebase Storage and get a reference to the service
-export const storage = getStorage(firebase_app)
+export const auth = authInstance
+export const db = dbInstance
+export const googleProvider = googleAuthProvider
+export const storage = storageInstance
 
-export { auth, db, googleProvider }
-export default firebase_app
+export default firebaseApp

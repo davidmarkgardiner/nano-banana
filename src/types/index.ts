@@ -14,6 +14,7 @@ export interface ImageMetadata {
     height: number
   }
   generatedAt: Date
+  prompt?: string
 }
 
 export interface ImageGenerationState {
