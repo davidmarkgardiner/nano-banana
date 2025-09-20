@@ -110,7 +110,7 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
 
       const bytes = decodeBase64ToUint8Array(data.data)
       const now = new Date()
-      const path = `nano-banana/${user.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getTime()}`
+      const path = `nano-banana/${user?.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getTime()}`
       const storageReference = ref(storage, path)
 
       await uploadBytes(storageReference, bytes, { contentType: data.contentType })
@@ -239,7 +239,7 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
 
       const now = new Date()
       const timestamp = now.toISOString().replace(/[:.]/g, '-')
-      const basePath = `user-uploads/${user.uid}/${timestamp}`
+      const basePath = `user-uploads/${user?.uid}/${timestamp}`
 
       const originalExtension = localFile.name.split('.').pop()?.toLowerCase() ?? 'jpg'
       const originalPath = `${basePath}/original.${originalExtension}`
