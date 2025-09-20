@@ -36,7 +36,7 @@ function isValidBase64(base64String: string): boolean {
     const decoded = atob(base64String)
     // Re-encode and compare to check for corruption
     return btoa(decoded) === base64String
-  } catch (error) {
+  } catch {
     return false
   }
 }
