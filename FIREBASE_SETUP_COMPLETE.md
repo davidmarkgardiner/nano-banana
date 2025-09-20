@@ -36,7 +36,7 @@ src/
 ```
 
 ## 🔥 Firebase Configuration
-- **API Key**: AIzaSyB8etEnV5YaQmD9BOpQMQdzW94kurj4i1M
+- **API Key**: xxxxx
 - **Auth Domain**: nano-banana-1758360022.firebaseapp.com
 - **Project ID**: nano-banana-1758360022
 - **Storage Bucket**: nano-banana-1758360022.firebasestorage.app

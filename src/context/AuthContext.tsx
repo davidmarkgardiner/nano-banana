@@ -83,23 +83,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!snapshot.exists()) {
         const now = Timestamp.now()
+
+        // Auto-approve certain admin emails
+        const adminEmails = ['davidmarkgardiner@gmail.com'] // Add your email here
+        const isAutoApproved = currentUser.email && adminEmails.includes(currentUser.email)
+        const initialStatus = isAutoApproved ? 'approved' : 'pending'
+
         await setDoc(approvalRef, {
-          status: 'pending',
+          status: initialStatus,
           email: currentUser.email ?? null,
           displayName: currentUser.displayName ?? null,
           requestedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          ...(isAutoApproved && {
+            approvedBy: 'system',
+            approvedAt: serverTimestamp()
+          })
         })
 
-        setApprovalStatus('pending')
+        setApprovalStatus(initialStatus)
         setApprovalRecord({
-          status: 'pending',
+          status: initialStatus,
           email: currentUser.email ?? null,
           displayName: currentUser.displayName ?? null,
           requestedAt: now,
           updatedAt: now,
-          approvedBy: null,
-          approvedAt: null,
+          approvedBy: isAutoApproved ? 'system' : null,
+          approvedAt: isAutoApproved ? now : null,
         })
         return
       }
