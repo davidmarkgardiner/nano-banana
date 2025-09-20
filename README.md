@@ -1,41 +1,39 @@
-# 🔥 Firebase Authentication Template
+# 🍌 Nano Banana - AI Image Generator
 
-A production-ready Next.js template with Firebase Authentication featuring Google OAuth integration, modern UI components, and TypeScript support.
+A modern web application for generating AI images from text prompts, built with Next.js 15, Firebase Authentication, and TypeScript.
 
 ## ✨ Features
 
-- 🔥 **Firebase Authentication** - Complete auth system setup
-- 🔑 **Email/Password Auth** - Traditional login and registration
-- 🚀 **Google OAuth** - One-click Google sign-in
-- 🗄️ **Firestore Ready** - Database integration prepared
-- 🎨 **Modern UI** - Clean design with Tailwind CSS
-- 📱 **Responsive Design** - Mobile-first approach
+### Current Features
+- 🔥 **Firebase Authentication** - Secure user accounts with email/password and Google OAuth
+- 🎨 **Modern UI** - Clean, responsive design with Tailwind CSS
 - 🌙 **Dark Mode Support** - Automatic theme switching
-- ⚡ **Next.js 15** - Latest Next.js with App Router
-- 🔒 **TypeScript** - Full type safety
+- 📱 **Responsive Design** - Mobile-first approach that works on all devices
+- 🔒 **TypeScript** - Full type safety and better developer experience
 
-## Quick Start
+### Planned Features (In Development)
+- 🎨 **AI Image Generation** - Generate images from text prompts using nano-banana API
+- 💾 **Image History** - Save and manage your generated images in Firestore
+- 🔄 **Real-time Updates** - Live status updates during image generation
+- 📤 **Image Export** - Download and share generated images
+- 🎯 **Prompt Suggestions** - Smart suggestions to improve your prompts
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- Firebase account and project
+- (Optional) Devbox for consistent development environment
 
 ### 1. Clone and Install
 
 ```bash
 git clone <repository-url>
-cd firebase-template
+cd nano-banana
 npm install
 ```
 
-### 2. Firebase Setup
-
-1. Create a new project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable Authentication:
-   - Go to **Authentication** > **Sign-in method**
-   - Enable **Email/Password** provider
-   - Enable **Google** provider and configure OAuth consent screen
-3. Get your Firebase config:
-   - Go to **Project Settings** > **General** > **Your apps**
-   - Copy the Firebase configuration object
-
-### 3. Environment Setup
+### 2. Environment Setup
 
 ```bash
 cp .env.example .env.local
@@ -52,15 +50,20 @@ NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
+### 3. Firebase Setup
+
+1. Create a project at [Firebase Console](https://console.firebase.google.com/)
+2. Enable Authentication with Email/Password and Google providers
+3. Create a Firestore database
+4. Copy your configuration to `.env.local`
+
 ### 4. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see your app.
-
-## Development
+Open [http://localhost:3000](http://localhost:3000) to see the app.
 
 ## 📁 Project Structure
 
@@ -68,124 +71,225 @@ Open [http://localhost:3000](http://localhost:3000) to see your app.
 src/
 ├── app/
 │   ├── layout.tsx              # Root layout with AuthProvider
-│   └── page.tsx                # Home page with auth demo
+│   ├── page.tsx                # Main application with image generator
+│   └── globals.css             # Global styles and Tailwind imports
 ├── components/
-│   ├── FirestoreDemo.tsx       # Firestore integration example
-│   ├── LoginForm.tsx           # Login/Register form with Google OAuth
-│   └── UserProfile.tsx         # User profile display component
+│   ├── auth/
+│   │   ├── LoginForm.tsx       # Authentication form component
+│   │   └── UserProfile.tsx     # User profile display
+│   ├── image-generation/
+│   │   ├── ImageGenerator.tsx  # Main image generation interface
+│   │   ├── TextPromptInput.tsx # Text input for prompts
+│   │   ├── ImageDisplay.tsx    # Generated image display area
+│   │   └── ImageHistory.tsx    # User's generated images history
+│   └── ui/
+│       ├── UserHeader.tsx      # User info and logout header
+│       └── LoadingSpinner.tsx  # Reusable loading component
 ├── context/
-│   └── AuthContext.tsx         # Authentication context provider
-└── lib/
-    └── firebase.ts             # Firebase configuration and setup
+│   └── AuthContext.tsx         # Firebase authentication context
+├── hooks/
+│   └── useImageGeneration.ts   # Custom hook for image generation logic
+├── lib/
+│   ├── firebase.ts             # Firebase configuration
+│   ├── imageStorage.ts         # Firestore image persistence
+│   └── nanoBananaAPI.ts        # API integration (placeholder)
+└── types/
+    └── index.ts                # TypeScript type definitions
 ```
 
 ## 🔧 Available Scripts
 
 ```bash
-npm run dev          # Start development server
+npm run dev          # Start development server (localhost:3000)
 npm run build        # Build for production
 npm run start        # Start production server
 npm run lint         # Run ESLint
+npx playwright test  # Run end-to-end tests
 ```
 
-## 🎯 Authentication Features
+## 🎨 Image Generation Workflow
 
-### Email/Password Authentication
-- User registration with email validation
-- Secure login with error handling
-- Form validation and user feedback
+### User Journey
+1. **Authentication** - Users sign in with email/password or Google
+2. **Prompt Input** - Enter descriptive text for image generation
+3. **Generation** - Click generate to create AI image (connects to nano-banana API)
+4. **Display** - View generated image with loading states and error handling
+5. **History** - Access previously generated images from Firestore
 
-### Google OAuth Integration
-- One-click Google sign-in
-- Automatic user profile creation
-- Seamless authentication flow
-- Error handling for OAuth failures
+### Component Architecture
+- **ImageGenerator**: Main container managing state and coordinating child components
+- **TextPromptInput**: Handles user input with validation and character limits
+- **ImageDisplay**: Shows generated images with loading/error states
+- **ImageHistory**: Displays user's previous generations (optional feature)
 
-### User Management
-- Persistent authentication state
-- User profile display
-- Secure logout functionality
-- Loading states during auth operations
+## 🛠️ Development Workflow
+
+### With TaskMaster AI Integration
+
+This project includes TaskMaster AI for structured development:
+
+```bash
+# Initialize task management
+task-master init
+
+# View available tasks
+task-master list
+
+# Work on next task
+task-master next
+task-master show <task-id>
+
+# Mark tasks complete
+task-master set-status --id=<task-id> --status=done
+```
+
+### Using Devbox (Recommended)
+
+```bash
+# Enter consistent development environment
+devbox shell
+
+# Load secrets (if configured)
+devbox run load-secrets
+
+# Run security scans
+devbox run scan-secrets
+```
+
+## 🔒 Security & Best Practices
+
+### Authentication
+- Firebase handles all authentication securely
+- User sessions managed client-side with automatic refresh
+- Protected routes ensure only authenticated users access image generation
+
+### Data Storage
+- Generated images stored in Firestore with user association
+- Environment variables for all sensitive configuration
+- No API keys or secrets committed to repository
+
+### Development Security
+- **detect-secrets**: Automatic scanning for committed secrets
+- **Teller**: Secure secret management with Google Cloud integration
+- **ESLint**: Code quality and security linting rules
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Firebase Hosting (Primary)
 
-1. Push your code to GitHub
-2. Connect your repository to [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard
-4. Deploy automatically on every push
+```bash
+npm run build
+firebase deploy
+```
 
-### Other Platforms
+### Alternative Platforms
 
-This template works with any platform that supports Next.js:
-- Netlify
-- Railway
-- Digital Ocean
-- AWS Amplify
+The app is compatible with:
+- **Vercel**: Zero-config deployment with GitHub integration
+- **Netlify**: Static site deployment with environment variables
+- **Railway**: Full-stack deployment with database support
+- **AWS Amplify**: Scalable hosting with CI/CD pipeline
 
-## 🔒 Security Best Practices
+## 🧪 Testing
 
-- Environment variables for sensitive data
-- Client-side auth state management
-- Proper error handling without exposing sensitive info
-- TypeScript for compile-time safety
-- Firebase security rules ready for implementation
+### End-to-End Testing with Playwright
 
-## 🎨 UI Components
+```bash
+# Run all tests
+npx playwright test
 
-### LoginForm Component
-- Responsive design with mobile optimization
-- Toggle between login and registration modes
-- Google OAuth button with official branding
-- Real-time form validation
-- Dark mode support
+# Run with UI for debugging
+npx playwright test --ui
 
-### UserProfile Component
-- Display authenticated user information
-- Logout functionality
-- Profile picture from Google OAuth
-- Clean, accessible design
+# Run specific test suite
+npx playwright test tests/image-generation.spec.ts
+```
 
-## 🔧 Customization
+### Test Coverage
+- **Authentication flows**: Login, registration, Google OAuth
+- **Image generation UI**: Input validation, loading states, error handling
+- **Responsive design**: Mobile and desktop layouts
+- **Firebase integration**: Database operations and file storage
 
-### Adding New Auth Providers
+## 🤝 Contributing
 
-1. Enable the provider in Firebase Console
-2. Import the provider in `src/lib/firebase.ts`
-3. Add the sign-in method to `AuthContext.tsx`
-4. Update the `LoginForm.tsx` component
+### Development Setup
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/image-generation-ui`
+3. Follow the component structure in `/src/components/`
+4. Add tests for new functionality
+5. Submit pull request with TaskMaster task references
 
-### Styling
+### Code Standards
+- **TypeScript**: Strict mode enabled, full type coverage
+- **Component Structure**: Functional components with hooks
+- **Styling**: Tailwind CSS with consistent dark mode support
+- **Testing**: Playwright for E2E, component tests where needed
 
-The template uses Tailwind CSS with a custom configuration. Modify:
-- `tailwind.config.js` for theme customization
-- `src/app/globals.css` for global styles
-- Individual components for specific styling
+## 📚 API Integration (Coming Soon)
 
-### Database Integration
+### Nano Banana API Structure
+```typescript
+interface NanoBananaAPI {
+  generateImage(prompt: string): Promise<{
+    imageUrl: string
+    id: string
+    metadata: ImageMetadata
+  }>
+}
 
-Ready for Firestore integration:
-- Firebase config already includes Firestore
-- Example component in `FirestoreDemo.tsx`
-- Add your database rules in Firebase Console
+interface ImageMetadata {
+  prompt: string
+  generatedAt: Date
+  model: string
+  dimensions: { width: number; height: number }
+}
+```
+
+## 🔧 Environment Variables
+
+Required environment variables:
+
+```env
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+
+# Future: Nano Banana API
+# NANO_BANANA_API_KEY=
+# NANO_BANANA_BASE_URL=
+```
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
-- **White page**: Check environment variables in `.env.local`
-- **Google OAuth not working**: Verify authorized domains in Firebase Console
-- **Build errors**: Run `npm run build` to check for TypeScript errors
+**Firebase Connection**: Check environment variables in `.env.local`
+```bash
+# Verify Firebase connection
+npm run dev
+# Look for "Firebase connected and ready!" message
+```
 
-## 📝 License
+**Build Errors**: Run type checking
+```bash
+npm run build
+# Check for TypeScript errors in components
+```
 
-This template is open source and available under the [MIT License](LICENSE).
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
+**Authentication Issues**: Verify Firebase Console settings
+- Authorized domains configured correctly
+- Authentication providers enabled
+- Web app configuration matches `.env.local`
 
 ---
 
-**Happy coding!** 🎉
+**Ready to generate some amazing AI images!** 🎨🍌

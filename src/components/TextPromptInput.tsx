@@ -1,0 +1,146 @@
+'use client'
+
+import { useState, KeyboardEvent } from 'react'
+
+interface TextPromptInputProps {
+  value: string
+  onChange: (value: string) => void
+  onSubmit: () => void
+  isLoading: boolean
+  error: string | null
+  maxLength?: number
+}
+
+export default function TextPromptInput({
+  value,
+  onChange,
+  onSubmit,
+  isLoading,
+  error,
+  maxLength = 500
+}: TextPromptInputProps) {
+  const [isFocused, setIsFocused] = useState(false)
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault()
+      if (!isLoading && value.trim()) {
+        onSubmit()
+      }
+    }
+  }
+
+  const handleSubmit = () => {
+    if (!isLoading && value.trim()) {
+      onSubmit()
+    }
+  }
+
+  const characterCount = value.length
+  const isNearLimit = characterCount > maxLength * 0.8
+  const isOverLimit = characterCount > maxLength
+
+  return (
+    <div className="w-full max-w-2xl mx-auto">
+      {/* Input Section */}
+      <div className="relative">
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder="Describe the image you want to generate... (e.g., 'A serene mountain landscape at sunset with purple clouds')"
+          className={`
+            w-full min-h-[120px] p-4 rounded-lg border-2 transition-all duration-200
+            bg-white dark:bg-gray-800 
+            text-gray-900 dark:text-white
+            placeholder-gray-500 dark:placeholder-gray-400
+            resize-none
+            ${isFocused 
+              ? 'border-blue-500 shadow-lg ring-2 ring-blue-500/20' 
+              : 'border-gray-300 dark:border-gray-600 shadow-sm'
+            }
+            ${error 
+              ? 'border-red-500 dark:border-red-400' 
+              : ''
+            }
+            ${isOverLimit 
+              ? 'border-red-500 dark:border-red-400' 
+              : ''
+            }
+            focus:outline-none
+          `}
+          disabled={isLoading}
+          maxLength={maxLength}
+        />
+        
+        {/* Character Counter */}
+        <div className={`
+          absolute bottom-2 right-2 text-sm
+          ${isOverLimit 
+            ? 'text-red-500 dark:text-red-400' 
+            : isNearLimit 
+              ? 'text-yellow-600 dark:text-yellow-400'
+              : 'text-gray-400 dark:text-gray-500'
+          }
+        `}>
+          {characterCount}/{maxLength}
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mt-2 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-md">
+          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+        </div>
+      )}
+
+      {/* Submit Section */}
+      <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        {/* Keyboard Shortcut Hint */}
+        <div className="text-sm text-gray-500 dark:text-gray-400 order-2 sm:order-1">
+          Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">⌘ + Enter</kbd> to generate
+        </div>
+        
+        {/* Generate Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={isLoading || !value.trim() || isOverLimit}
+          className={`
+            px-8 py-3 rounded-lg font-medium transition-all duration-200 order-1 sm:order-2
+            ${isLoading || !value.trim() || isOverLimit
+              ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+            }
+            min-w-[120px] flex items-center justify-center
+          `}
+        >
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+              Generating...
+            </>
+          ) : (
+            <>
+              🎨 Generate
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Tips */}
+      {!error && value.length === 0 && (
+        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">💡 Tips for better results:</h4>
+          <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+            <li>• Be specific about colors, lighting, and mood</li>
+            <li>• Mention the style (realistic, cartoon, artistic, etc.)</li>
+            <li>• Include details about composition and perspective</li>
+            <li>• Try: &quot;A cozy coffee shop interior with warm lighting and vintage furniture&quot;</li>
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}

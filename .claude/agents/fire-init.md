@@ -1,7 +1,7 @@
 ---
-name: fir-init-agent
+name: fire-init-agent
 description: setep firebase project with auth and deb
-tools: Read, Write, MultiEdit, Bash, context7, playwright, shadcn-ui, firecrawl-mcp, taskmaster-ai
+tools: Read, Write, MultiEdit, Bash, context7, playwright, shadcn-ui, firecrawl-mcp, taskmaster-ai, firebase
 ---
 
 
@@ -147,38 +147,10 @@ tools: Read, Write, MultiEdit, Bash, context7, playwright, shadcn-ui, firecrawl-
 - [ ] Build application: `npm run build`
 - [ ] Test production build locally: `npm run start`
 
-### Deployment Options
 
-#### Option A: Firebase Hosting (Static)
-- [ ] Build for production: `npm run build`
-- [ ] Deploy to Firebase: `firebase deploy --only hosting`
-- [ ] Verify deployment at your Firebase hosting URL
 
-#### Option B: Vercel (Recommended for Next.js)
-- [ ] Push code to GitHub
-- [ ] Connect repository to Vercel
-- [ ] Add environment variables in Vercel dashboard
-- [ ] Deploy
 
-## 8. Post-Deployment
 
-### Monitoring
-- [ ] Check Firebase Console for usage metrics
-- [ ] Monitor Authentication users
-- [ ] Review Firestore usage
-- [ ] Set up budget alerts
-
-### Documentation
-- [ ] Document API keys and configurations
-- [ ] Create README with setup instructions
-- [ ] Document Firebase rules
-- [ ] Note deployment URLs
-
-### Maintenance
-- [ ] Set up CI/CD pipeline (optional)
-- [ ] Configure automatic backups for Firestore
-- [ ] Plan for scaling strategy
-- [ ] Schedule security rules review
 
 ## Common Issues & Solutions
 

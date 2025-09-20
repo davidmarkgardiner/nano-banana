@@ -22,30 +22,53 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const signup = async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase Auth not initialized')
     await createUserWithEmailAndPassword(auth, email, password)
   }
 
   const login = async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase Auth not initialized')
     await signInWithEmailAndPassword(auth, email, password)
   }
 
   const loginWithGoogle = async () => {
+    if (!auth || !googleProvider) throw new Error('Firebase Auth not initialized')
     await signInWithPopup(auth, googleProvider)
   }
 
   const logout = async () => {
+    if (!auth) throw new Error('Firebase Auth not initialized')
     await signOut(auth)
   }
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user)
+    if (!auth) {
+      console.warn('Firebase Auth not initialized - running without authentication')
       setLoading(false)
-    })
+      setError('Firebase Auth not available')
+      return
+    }
 
-    return unsubscribe
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user)
+        setLoading(false)
+        setError(null)
+      }, (error) => {
+        console.warn('Firebase Auth not configured yet:', error.message)
+        setError('Firebase Auth not configured')
+        setLoading(false)
+      })
+
+      return unsubscribe
+    } catch (error: any) {
+      console.warn('Firebase Auth initialization error:', error.message)
+      setError('Firebase Auth not available')
+      setLoading(false)
+    }
   }, [])
 
   const value = {

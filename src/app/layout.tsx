@@ -6,8 +6,8 @@ import { AuthProvider } from '@/context/AuthContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Firebase Hello World',
-  description: 'A simple Next.js app with Firebase integration',
+  title: 'Nano Banana - AI Image Generator',
+  description: 'Generate beautiful images from text using AI - powered by Firebase and Next.js',
 }
 
 export default function RootLayout({

@@ -12,15 +12,26 @@ const firebaseConfig = {
 }
 
 // Initialize Firebase
-let firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+let firebase_app: any = null
+let auth: any = null
+let db: any = null
+let googleProvider: any = null
 
-// Initialize Firebase Auth and get a reference to the service
-export const auth = getAuth(firebase_app)
+try {
+  firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
 
-// Initialize Firebase Firestore and get a reference to the service
-export const db = getFirestore(firebase_app)
+  // Initialize Firebase Auth and get a reference to the service
+  auth = getAuth(firebase_app)
 
-// Initialize Google Auth Provider
-export const googleProvider = new GoogleAuthProvider()
+  // Initialize Firebase Firestore and get a reference to the service
+  db = getFirestore(firebase_app)
+
+  // Initialize Google Auth Provider
+  googleProvider = new GoogleAuthProvider()
+} catch (error) {
+  console.warn('Firebase initialization failed:', error)
+}
+
+export { auth, db, googleProvider }
 
 export default firebase_app
