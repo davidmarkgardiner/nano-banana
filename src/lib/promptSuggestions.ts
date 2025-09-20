@@ -1,14 +1,14 @@
 export const PROMPT_SUGGESTIONS = [
-  'A bioluminescent rainforest at midnight with misty waterfalls and glowing wildlife painted in vibrant watercolor strokes',
-  'An ancient library carved into a mountainside, lit by floating candles and filled with swirling constellations',
-  'A futuristic jazz club on a floating island with neon holographic musicians and Art Deco architecture',
-  'A serene tea ceremony held by robots in a moss-covered Kyoto garden at golden hour',
-  'An underwater metropolis built inside glowing coral domes with manta-ray taxis gliding through the streets',
-  'A steampunk airship market at dawn with merchants selling clockwork creatures beneath billowing copper balloons',
-  'A cozy cottage perched on a giant turtle traveling across a starlit desert with aurora-filled skies',
-  'A retro-futuristic diner on the moon serving cosmic milkshakes under a panoramic view of Earthrise',
-  'A crystalline ice palace orchestra performing for snow spirits during a swirling aurora borealis',
-  'A whimsical botanical laboratory where plants float midair and emit soft pastel light in a dreamy oil painting style'
+  'A professional headshot of a confident business woman in natural office lighting with soft shadows',
+  'A scenic mountain landscape during golden hour with rolling hills and morning mist, shot with a wide-angle lens',
+  'A candid street photography scene of people walking through a bustling city market on a sunny afternoon',
+  'A close-up portrait of an elderly man with weathered hands reading a book by a window with natural light',
+  'A minimalist architectural photograph of a modern glass building reflecting the blue sky and white clouds',
+  'A nature photograph of a serene lake surrounded by autumn trees with their colorful reflection in the water',
+  'A lifestyle photo of a young couple enjoying coffee at a cozy café with warm ambient lighting',
+  'A wildlife photograph of a majestic eagle in flight against a clear blue sky, captured with telephoto lens',
+  'A black and white street portrait of a musician playing guitar on a cobblestone street in the evening',
+  'A macro photograph of morning dew drops on flower petals with soft natural lighting and shallow depth of field'
 ] as const
 
 export type PromptSuggestion = (typeof PROMPT_SUGGESTIONS)[number]

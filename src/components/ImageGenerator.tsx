@@ -13,6 +13,7 @@ interface ImageGeneratorProps {
   onLogout: () => Promise<void>
 }
 
+
 const quickTips = [
   {
     title: 'Paint the scene',
@@ -41,6 +42,7 @@ const highlightPills = [
 ]
 
 export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) {
+  const [tipsExpanded, setTipsExpanded] = useState(false)
   const {
     prompt,
     setPrompt,
@@ -63,6 +65,7 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
   const handleClear = () => {
     reset()
   }
+
 
   const handlePromptInspirationUse = (value: string) => {
     if (isLoading) {
@@ -117,7 +120,8 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               ))}
             </div>
 
-            <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} />
+            <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} className="max-w-2xl mx-auto" />
+
 
             <TextPromptInput
               value={prompt}
@@ -159,66 +163,51 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
       {shouldShowTips && (
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 lg:px-12">
           <div
-            className="rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl transition-all duration-300"
-            onMouseEnter={() => setIsTipsHovered(true)}
-            onMouseLeave={() => setIsTipsHovered(false)}
+            className="rounded-3xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-2xl transition-all duration-300 cursor-pointer"
+            onMouseEnter={() => setTipsExpanded(true)}
+            onMouseLeave={() => setTipsExpanded(false)}
+            onClick={() => setTipsExpanded(!tipsExpanded)}
           >
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="p-8">
+              <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-100">Quick guidance</p>
-                  {!showTipsContent && (
-                    <p className="mt-2 text-xs text-slate-200/70">Hover or select to explore the quick tips.</p>
-                  )}
-                  {showTipsContent && (
-                    <>
-                      <h3 className="mt-3 text-2xl font-semibold text-white">
-                        Craft prompts that glow with detail
-                      </h3>
-                      <p className="mt-2 max-w-2xl text-sm text-slate-200/80">
-                        These tips help the model understand what matters most in your scene. Try combining them with the AI inspiration suggestions for instant results.
-                      </p>
-                    </>
+                  <h3 className="mt-3 text-2xl font-semibold text-white">
+                    Craft prompts that glow with detail
+                  </h3>
+                  {!tipsExpanded && (
+                    <p className="mt-2 text-sm text-slate-200/60">
+                      Hover or click to see helpful tips
+                    </p>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setIsTipsExpanded((prev) => {
-                      const next = !prev
-                      if (!next) {
-                        setIsTipsHovered(false)
-                      }
-                      return next
-                    })
-                  }
-                  className="inline-flex items-center gap-2 self-start rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium text-slate-100 transition hover:border-white/40 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                  aria-expanded={showTipsContent}
-                >
-                  <span>{showTipsContent ? 'Hide tips' : 'Show tips'}</span>
-                  <span
-                    aria-hidden="true"
-                    className={`text-base transition-transform ${showTipsContent ? 'rotate-180' : ''}`}
-                  >
-                    ▾
+                <div className="flex items-center gap-2">
+                  <span className={`text-xl transition-transform duration-300 ${tipsExpanded ? 'rotate-180' : ''}`}>
+                    ▼
                   </span>
-                </button>
+                </div>
               </div>
-              {showTipsContent && (
-                <div className="grid w-full gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {quickTips.map((tip) => (
-                    <div
-                      key={tip.title}
-                      className={`rounded-2xl border border-white/10 bg-gradient-to-br ${tip.accent} p-5 text-left shadow-lg backdrop-blur-xl`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xl">{tip.icon}</span>
-                        <span className="h-2 w-2 rounded-full bg-white/60" />
+
+              {tipsExpanded && (
+                <div className="mt-6 space-y-6">
+                  <p className="max-w-2xl text-sm text-slate-200/80">
+                    These tips help the model understand what matters most in your scene. Try combining them with the inspiration prompts above for instant results.
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {quickTips.map((tip) => (
+                      <div
+                        key={tip.title}
+                        className={`rounded-2xl border border-white/10 bg-gradient-to-br ${tip.accent} p-5 text-left shadow-lg backdrop-blur-xl`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl">{tip.icon}</span>
+                          <span className="h-2 w-2 rounded-full bg-white/60" />
+                        </div>
+                        <h4 className="mt-4 text-base font-semibold text-white">{tip.title}</h4>
+                        <p className="mt-2 text-sm text-slate-100/80">{tip.description}</p>
                       </div>
-                      <h4 className="mt-4 text-base font-semibold text-white">{tip.title}</h4>
-                      <p className="mt-2 text-sm text-slate-100/80">{tip.description}</p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

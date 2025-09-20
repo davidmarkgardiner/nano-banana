@@ -7,13 +7,14 @@ import type { PromptSuggestionResponse } from '@/types'
 interface PromptInspirationProps {
   onUsePrompt: (prompt: string) => void
   isGenerating?: boolean
+  className?: string
 }
 
 function sanitizePromptText(text: string): string {
   return text.replace(/\s+/g, ' ').trim()
 }
 
-export default function PromptInspiration({ onUsePrompt, isGenerating = false }: PromptInspirationProps) {
+export default function PromptInspiration({ onUsePrompt, isGenerating = false, className }: PromptInspirationProps) {
   const initialSuggestion = useMemo(() => getRandomPromptSuggestion(), [])
   const [suggestion, setSuggestion] = useState<string>(initialSuggestion)
   const [source, setSource] = useState<'gemini' | 'fallback'>('fallback')
