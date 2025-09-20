@@ -5,6 +5,7 @@ import LoginForm from '@/components/LoginForm'
 import ImageGenerator from '@/components/ImageGenerator'
 import FirestoreDemo from '@/components/FirestoreDemo'
 import UserProfile from '@/components/UserProfile'
+import NanoBananaImageUploader from '@/components/NanoBananaImageUploader'
 
 const features = [
   {
@@ -136,7 +137,10 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-              <UserProfile />
+              <div className="space-y-8">
+                <UserProfile />
+                <NanoBananaImageUploader />
+              </div>
               <FirestoreDemo />
             </div>
           )}
@@ -194,6 +198,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+
       </div>
     </main>
   )

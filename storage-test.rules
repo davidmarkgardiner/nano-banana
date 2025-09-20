@@ -1,0 +1,27 @@
+rules_version = '2';
+
+// TEMPORARY Firebase Storage Security Rules for Testing
+// WARNING: These rules allow public read/write access and should only be used for testing
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Allow public read/write access to test-uploads folder for testing
+    match /test-uploads/{allPaths=**} {
+      allow read, write: if true;
+    }
+    
+    // Users can read and write their own images in the nano-banana folder
+    match /nano-banana/{userId}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow authenticated users to read any nano-banana images for sharing
+    match /nano-banana/{userId}/{allPaths=**} {
+      allow read: if request.auth != null;
+    }
+
+    // Deny all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
