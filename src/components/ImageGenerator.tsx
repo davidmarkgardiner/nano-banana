@@ -10,6 +10,7 @@ import PromptInspiration from '@/components/PromptInspiration'
 import { useCanvasImage } from '@/context/CanvasImageContext'
 import { ImageFilter } from '@/lib/imageFilters'
 import { useImageRemix } from '@/hooks/useImageRemix'
+import ImageTransfusionPanel from '@/components/ImageTransfusionPanel'
 
 interface ImageGeneratorProps {
   user: User
@@ -303,6 +304,8 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               )}
             </div>
           </div>
+
+          <ImageTransfusionPanel className="mx-auto w-full max-w-5xl" />
         </div>
       </div>
 

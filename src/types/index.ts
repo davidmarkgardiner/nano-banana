@@ -36,9 +36,16 @@ export interface NanoBananaImageEditRequest {
   instruction: string
 }
 
+export interface NanoBananaImageTransfusionRequest {
+  baseImageDataUrl: string
+  referenceImageDataUrl: string
+  instruction: string
+}
+
 export interface NanoBananaAPI {
   generateImage(prompt: string): Promise<NanoBananaAPIResponse>
   editImage(request: NanoBananaImageEditRequest): Promise<NanoBananaAPIResponse>
+  transfuseImages(request: NanoBananaImageTransfusionRequest): Promise<NanoBananaAPIResponse>
 }
 
 export interface PromptSuggestionResponse {

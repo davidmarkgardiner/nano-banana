@@ -1,4 +1,9 @@
-import { NanoBananaAPI, NanoBananaAPIResponse, NanoBananaImageEditRequest } from '@/types'
+import {
+  NanoBananaAPI,
+  NanoBananaAPIResponse,
+  NanoBananaImageEditRequest,
+  NanoBananaImageTransfusionRequest,
+} from '@/types'
 
 // Mock implementation for development
 // This will be replaced with actual API integration later
@@ -45,6 +50,31 @@ class MockNanoBananaAPI implements NanoBananaAPI {
       id: mockImageId,
       metadata: {
         model: 'nano-banana-v1-mock-edit',
+        dimensions: {
+          width: 1024,
+          height: 1024
+        },
+        generatedAt: new Date(),
+        prompt: instruction,
+      }
+    }
+  }
+
+  async transfuseImages({ instruction }: NanoBananaImageTransfusionRequest): Promise<NanoBananaAPIResponse> {
+    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000))
+
+    if (Math.random() < 0.1) {
+      throw new Error('Failed to blend the provided photos. Please try again.')
+    }
+
+    const mockImageId = Math.random().toString(36).substring(7)
+    const normalizedInstruction = encodeURIComponent(instruction.trim() || 'transfusion')
+
+    return {
+      imageUrl: `https://picsum.photos/seed/${normalizedInstruction}-${mockImageId}/1024/1024`,
+      id: mockImageId,
+      metadata: {
+        model: 'nano-banana-v1-mock-transfusion',
         dimensions: {
           width: 1024,
           height: 1024
@@ -111,6 +141,34 @@ class NanoBananaAPIClient implements NanoBananaAPI {
       }
 
       throw new Error('An unexpected error occurred while editing the image')
+    }
+  }
+
+  async transfuseImages(request: NanoBananaImageTransfusionRequest): Promise<NanoBananaAPIResponse> {
+    try {
+      const response = await fetch('/api/transfuse-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to transfuse the images')
+      }
+
+      return data
+    } catch (error) {
+      console.error('API Error:', error)
+
+      if (error instanceof Error) {
+        throw error
+      }
+
+      throw new Error('An unexpected error occurred while transfusing the images')
     }
   }
 }
