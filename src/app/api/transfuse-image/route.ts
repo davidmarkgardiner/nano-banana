@@ -29,6 +29,46 @@ function sanitizeInstruction(instruction: string): string {
     .trim()
 }
 
+// Base64 validation function
+function isValidBase64(base64String: string): boolean {
+  try {
+    // Check if it's a valid base64 string
+    const decoded = atob(base64String)
+    // Re-encode and compare to check for corruption
+    return btoa(decoded) === base64String
+  } catch (error) {
+    return false
+  }
+}
+
+// Image data validation function
+function validateImageData(dataUrl: string): { valid: boolean; error?: string } {
+  const match = dataUrl.match(DATA_URL_REGEX)
+  if (!match) {
+    return { valid: false, error: 'Invalid data URL format' }
+  }
+
+  const [, mimeType, base64Data] = match
+
+  // Check MIME type
+  if (!mimeType.startsWith('image/')) {
+    return { valid: false, error: 'File must be an image' }
+  }
+
+  // Validate base64 data
+  if (!isValidBase64(base64Data)) {
+    return { valid: false, error: 'Invalid or corrupted image data' }
+  }
+
+  // Check base64 length (rough size check)
+  const sizeBytes = (base64Data.length * 3) / 4
+  if (sizeBytes > 10 * 1024 * 1024) { // 10MB per image
+    return { valid: false, error: 'Image file too large (max 10MB)' }
+  }
+
+  return { valid: true }
+}
+
 // Rate limiting check
 function checkRateLimit(clientId: string): boolean {
   const now = Date.now()
@@ -73,6 +113,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
+    // Validate content type
+    const contentType = request.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      return NextResponse.json(
+        { error: 'Content-Type must be application/json' },
+        { status: 400 }
+      )
+    }
+
     // Check request size before parsing
     const contentLength = request.headers.get('content-length')
     if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
@@ -82,7 +131,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const body = (await request.json()) as ImageTransfusionRequestBody
+    // Parse JSON with better error handling
+    let body: ImageTransfusionRequestBody
+    try {
+      body = (await request.json()) as ImageTransfusionRequestBody
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError)
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body. Please check your request format.' },
+        { status: 400 }
+      )
+    }
 
     // Additional request size check after parsing
     const requestSize = JSON.stringify(body).length
@@ -128,12 +187,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
-    const baseMatch = baseImageDataUrl.match(DATA_URL_REGEX)
-    const referenceMatch = referenceImageDataUrl.match(DATA_URL_REGEX)
-
-    if (!baseMatch || !referenceMatch) {
+    // Validate base image data
+    const baseValidation = validateImageData(baseImageDataUrl)
+    if (!baseValidation.valid) {
       return NextResponse.json(
-        { error: 'Images must be provided as base64 encoded data URLs.' },
+        { error: `Base image error: ${baseValidation.error}` },
+        { status: 400 }
+      )
+    }
+
+    // Validate reference image data
+    const referenceValidation = validateImageData(referenceImageDataUrl)
+    if (!referenceValidation.valid) {
+      return NextResponse.json(
+        { error: `Reference image error: ${referenceValidation.error}` },
         { status: 400 }
       )
     }
@@ -147,6 +214,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
+    // Extract data from validated URLs (safe to use ! since we've already validated)
+    const baseMatch = baseImageDataUrl.match(DATA_URL_REGEX)!
+    const referenceMatch = referenceImageDataUrl.match(DATA_URL_REGEX)!
     const [, baseMimeType, baseData] = baseMatch
     const [, referenceMimeType, referenceData] = referenceMatch
 
@@ -231,6 +301,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       } else if (error.message.includes('timeout')) {
         errorMessage = 'Request timed out. Please try again with smaller images or a shorter instruction.'
         statusCode = 408
+      } else if (error.message.includes('Base64 decoding failed')) {
+        errorMessage = 'Invalid image data detected. Please try uploading your photos again.'
+        statusCode = 400
+      } else if (error.message.includes('fetch') || error.message.includes('network')) {
+        errorMessage = 'Network error occurred. Please check your connection and try again.'
+        statusCode = 502
+      } else if (error.message.includes('file size') || error.message.includes('too large')) {
+        errorMessage = 'Image files are too large. Please use smaller images (under 10MB each).'
+        statusCode = 413
+      } else if (error.message.includes('unsupported') || error.message.includes('format')) {
+        errorMessage = 'Unsupported image format. Please use JPG, PNG, or WebP images.'
+        statusCode = 400
       } else {
         errorMessage = `Failed to transfuse images: ${error.message}`
       }
