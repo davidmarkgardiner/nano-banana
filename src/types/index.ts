@@ -35,6 +35,12 @@ export interface NanoBananaAPI {
   generateImage(prompt: string): Promise<NanoBananaAPIResponse>
 }
 
+export interface PromptSuggestionResponse {
+  prompt: string
+  source: 'gemini' | 'fallback'
+  warning?: string
+}
+
 export interface UseImageGenerationReturn {
   prompt: string
   setPrompt: (prompt: string) => void
