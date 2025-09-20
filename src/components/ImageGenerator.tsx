@@ -54,8 +54,6 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
     reset
   } = useImageGeneration()
 
-  const [isTipsExpanded, setIsTipsExpanded] = useState(false)
-  const [isTipsHovered, setIsTipsHovered] = useState(false)
 
   const handleRetry = () => {
     clearError()
@@ -77,7 +75,6 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
   }
 
   const shouldShowTips = !generatedImage && !isLoading
-  const showTipsContent = isTipsExpanded || isTipsHovered
 
   return (
     <section className="relative isolate overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100">
