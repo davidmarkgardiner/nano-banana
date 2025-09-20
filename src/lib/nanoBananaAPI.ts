@@ -86,6 +86,64 @@ class MockNanoBananaAPI implements NanoBananaAPI {
   }
 }
 
+async function parseNanoBananaResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get('content-type') ?? ''
+
+  // Clone the response to avoid "body stream already read" errors
+  const responseClone = response.clone()
+  const responseText = await responseClone.text()
+  const trimmedText = responseText.trim()
+  const isJsonResponse = contentType.includes('application/json')
+
+  let parsedData: unknown
+  let parsedJsonSuccessfully = false
+
+  if (isJsonResponse) {
+    try {
+      parsedData = JSON.parse(responseText)
+      parsedJsonSuccessfully = true
+    } catch {
+      parsedJsonSuccessfully = false
+    }
+  }
+
+  if (!response.ok) {
+    if (response.status === 413) {
+      throw new Error('The uploaded images are too large. Please try again with smaller files.')
+    }
+
+    if (
+      parsedJsonSuccessfully &&
+      parsedData &&
+      typeof parsedData === 'object' &&
+      'error' in parsedData &&
+      typeof (parsedData as { error?: unknown }).error === 'string'
+    ) {
+      throw new Error((parsedData as { error: string }).error)
+    }
+
+    if (trimmedText.length > 0) {
+      throw new Error(trimmedText)
+    }
+
+    throw new Error(`Request failed with status ${response.status}`)
+  }
+
+  if (parsedJsonSuccessfully && parsedData && typeof parsedData === 'object') {
+    return parsedData as T
+  }
+
+  if (isJsonResponse) {
+    throw new Error('Failed to parse the server response. Please try again later.')
+  }
+
+  if (trimmedText.length === 0) {
+    throw new Error('Received empty response from the server.')
+  }
+
+  throw new Error('Unexpected response format received from the server.')
+}
+
 // Production API implementation using server-side endpoint
 class NanoBananaAPIClient implements NanoBananaAPI {
   async generateImage(prompt: string): Promise<NanoBananaAPIResponse> {
@@ -98,20 +156,7 @@ class NanoBananaAPIClient implements NanoBananaAPI {
         body: JSON.stringify({ prompt })
       })
 
-      let data
-      try {
-        data = await response.json()
-      } catch {
-        const text = await response.text()
-        console.error('Non-JSON response:', text)
-        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate image')
-      }
-
-      return data
+      return await parseNanoBananaResponse<NanoBananaAPIResponse>(response)
     } catch (error) {
       console.error('API Error:', error)
 
@@ -133,20 +178,7 @@ class NanoBananaAPIClient implements NanoBananaAPI {
         body: JSON.stringify(request)
       })
 
-      let data
-      try {
-        data = await response.json()
-      } catch {
-        const text = await response.text()
-        console.error('Non-JSON response:', text)
-        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to edit the image')
-      }
-
-      return data
+      return await parseNanoBananaResponse<NanoBananaAPIResponse>(response)
     } catch (error) {
       console.error('API Error:', error)
 
@@ -168,21 +200,7 @@ class NanoBananaAPIClient implements NanoBananaAPI {
         body: JSON.stringify(request)
       })
 
-      let data
-      try {
-        data = await response.json()
-      } catch {
-        // If response is not JSON, get text for better error reporting
-        const text = await response.text()
-        console.error('Non-JSON response:', text)
-        throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
-      }
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to transfuse the images')
-      }
-
-      return data
+      return await parseNanoBananaResponse<NanoBananaAPIResponse>(response)
     } catch (error) {
       console.error('API Error:', error)
 
