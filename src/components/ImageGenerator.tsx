@@ -99,9 +99,9 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
         className="relative z-20 mx-auto w-full max-w-7xl px-6 pt-8 lg:px-12"
       />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col-reverse items-center gap-12 px-6 pb-20 pt-12 lg:flex-row lg:items-stretch lg:gap-16 lg:px-12">
-        <div className="w-full lg:w-[420px] xl:w-[460px]">
-          <div className="flex h-full flex-col gap-8 text-center lg:text-left">
+      <div className="relative z-10 mx-auto w-full px-6 pb-20 pt-12 lg:px-12">
+        <div className="flex flex-col gap-12">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 text-center lg:items-start lg:text-left">
             <div className="space-y-5">
               <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-sky-200">
                 AI Canvas
@@ -158,32 +158,32 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               onSubmit={generateImage}
               isLoading={isLoading}
               error={error}
-              className="mx-0 max-w-none"
+              className="max-w-5xl lg:mx-0"
             />
           </div>
-        </div>
+          <div className="relative flex w-full items-center justify-center">
+            <div className="absolute -inset-10 hidden rounded-[48px] bg-gradient-to-br from-sky-500/20 via-purple-500/10 to-transparent blur-3xl lg:block" />
+            <div className="relative w-full">
+              <ImageDisplay
+                imageUrl={generatedImage}
+                isLoading={isLoading}
+                error={error}
+                prompt={prompt}
+                onRetry={handleRetry}
+                onClear={handleClear}
+                variant="hero"
+                className="max-w-none"
+              />
 
-        <div className="relative flex w-full flex-1 items-center justify-center">
-          <div className="absolute -inset-10 hidden rounded-[48px] bg-gradient-to-br from-sky-500/20 via-purple-500/10 to-transparent blur-3xl lg:block" />
-          <div className="relative w-full max-w-[620px]">
-            <ImageDisplay
-              imageUrl={generatedImage}
-              isLoading={isLoading}
-              error={error}
-              prompt={prompt}
-              onRetry={handleRetry}
-              onClear={handleClear}
-              variant="hero"
-            />
-
-            {generatedImage && !isLoading && !error && (
-              <div className="mt-6 flex justify-center lg:justify-end">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 shadow-[0_20px_60px_-30px_rgba(52,211,153,0.65)]">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-300" />
-                  Image generated successfully!
+              {generatedImage && !isLoading && !error && (
+                <div className="mt-6 flex justify-center lg:justify-end">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-medium text-emerald-100 shadow-[0_20px_60px_-30px_rgba(52,211,153,0.65)]">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-300" />
+                    Image generated successfully!
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
