@@ -201,10 +201,12 @@ export default function ImageDisplay({
               src={imageUrl}
               alt={prompt}
               fill
-              className="object-cover"
+              className="object-contain"
               onLoad={handleImageLoad}
               onError={handleImageError}
               priority
+              quality={95}
+              unoptimized={imageUrl.startsWith('data:')}
             />
           )}
 
