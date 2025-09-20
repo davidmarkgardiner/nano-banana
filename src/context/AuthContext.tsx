@@ -22,7 +22,6 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   const signup = async (email: string, password: string) => {
     if (!auth) throw new Error('Firebase Auth not initialized')
@@ -48,7 +47,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!auth) {
       console.warn('Firebase Auth not initialized - running without authentication')
       setLoading(false)
-      setError('Firebase Auth not available')
       return
     }
 
@@ -56,17 +54,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         setUser(user)
         setLoading(false)
-        setError(null)
       }, (error) => {
         console.warn('Firebase Auth not configured yet:', error.message)
-        setError('Firebase Auth not configured')
         setLoading(false)
       })
 
       return unsubscribe
-    } catch (error: any) {
-      console.warn('Firebase Auth initialization error:', error.message)
-      setError('Firebase Auth not available')
+    } catch (error) {
+      console.warn('Firebase Auth initialization error:', error instanceof Error ? error.message : 'Unknown error')
       setLoading(false)
     }
   }, [])

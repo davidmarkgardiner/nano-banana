@@ -3,7 +3,9 @@ import { NanoBananaAPI, NanoBananaAPIResponse } from '@/types'
 // Mock implementation for development
 // This will be replaced with actual API integration later
 class MockNanoBananaAPI implements NanoBananaAPI {
-  async generateImage(_prompt: string): Promise<NanoBananaAPIResponse> {
+  async generateImage(prompt: string): Promise<NanoBananaAPIResponse> {
+    // Note: prompt is ignored in mock implementation
+    void prompt
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000))
     

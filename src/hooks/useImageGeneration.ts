@@ -60,6 +60,11 @@ export function useImageGeneration(): UseImageGenerationReturn {
             }
 
             // Create storage path
+            if (!storage) {
+              console.warn('Storage not initialized, skipping auto-save')
+              return
+            }
+
             const now = new Date()
             const timestamp = now.getTime()
             const path = `nano-banana/${user.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${timestamp}`

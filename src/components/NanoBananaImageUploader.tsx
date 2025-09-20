@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
+import Image from 'next/image'
 
 interface NanoBananaResponse {
   contentType: string
@@ -71,6 +72,10 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       }
 
       const data = (await response.json()) as NanoBananaResponse
+      if (!storage) {
+        throw new Error('Storage not initialized')
+      }
+
       const bytes = decodeBase64ToUint8Array(data.data)
       const now = new Date()
       const path = `nano-banana/${user.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getTime()}`
@@ -142,9 +147,11 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
           </a>
           {downloadUrl && (
             <div className="mt-4">
-              <img
+              <Image
                 src={downloadUrl}
                 alt="Stored Nano Banana preview"
+                width={512}
+                height={256}
                 className="max-h-64 w-full object-contain rounded-md border border-gray-200 dark:border-gray-700"
               />
             </div>

@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from 'firebase/app'
-import { getAuth, GoogleAuthProvider } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app'
+import { getAuth, GoogleAuthProvider, Auth } from 'firebase/auth'
+import { getFirestore, Firestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
 const firebaseConfig = {
@@ -13,10 +13,10 @@ const firebaseConfig = {
 }
 
 // Initialize Firebase
-let firebase_app: any = null
-let auth: any = null
-let db: any = null
-let googleProvider: any = null
+let firebase_app: FirebaseApp | null = null
+let auth: Auth | null = null
+let db: Firestore | null = null
+let googleProvider: GoogleAuthProvider | null = null
 
 try {
   firebase_app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
@@ -34,7 +34,7 @@ try {
 }
 
 // Initialize Firebase Storage and get a reference to the service
-export const storage = getStorage(firebase_app)
+export const storage = firebase_app ? getStorage(firebase_app) : null
 
 export { auth, db, googleProvider }
 export default firebase_app

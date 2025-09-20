@@ -44,6 +44,11 @@ export default function FirestoreDemo() {
       setRefreshing(true)
       setError('')  // Clear any existing errors
       console.log('Fetching messages...')
+
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
+
       const q = query(collection(db, 'messages'), orderBy('timestamp', 'desc'))
       const querySnapshot = await getDocs(q)
       const messageList: Message[] = []
@@ -62,7 +67,7 @@ export default function FirestoreDemo() {
     } catch (error) {
       console.error('Error fetching messages:', error)
       setError('Failed to fetch messages. Please check your connection and try again.')
-      if ((error as any).code === 'permission-denied') {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 'permission-denied') {
         alert('Permission denied. Please ensure you are logged in and Firestore rules are configured correctly.')
       }
     } finally {
@@ -84,6 +89,10 @@ export default function FirestoreDemo() {
       setSaveSuccess(false)
       console.log('Adding message with user:', user.uid)
 
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
+
       const docData = {
         text: newMessage,
         timestamp: new Date(),
@@ -100,10 +109,10 @@ export default function FirestoreDemo() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSaveSuccess(false), 3000)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding message:', error)
       setError('Failed to save message. Please try again.')
-      alert('Failed to add message: ' + (error as any).message)
+      alert('Failed to add message: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -111,6 +120,9 @@ export default function FirestoreDemo() {
 
   const deleteMessage = async (messageId: string) => {
     try {
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
       await deleteDoc(doc(db, 'messages', messageId))
       await fetchMessages()
     } catch (error) {
@@ -121,6 +133,11 @@ export default function FirestoreDemo() {
   const clearMessages = async () => {
     try {
       setClearing(true)
+
+      if (!db) {
+        throw new Error('Database not initialized')
+      }
+
       const snapshot = await getDocs(collection(db, 'messages'))
       const deletePromises = snapshot.docs.map((messageDoc) => deleteDoc(messageDoc.ref))
 
