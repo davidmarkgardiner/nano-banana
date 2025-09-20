@@ -59,6 +59,11 @@ export function useImageGeneration(): UseImageGenerationReturn {
               bytes[i] = binaryString.charCodeAt(i)
             }
 
+            if (!storage) {
+              console.warn('Firebase Storage not available, skipping auto-save')
+              return
+            }
+
             // Create storage path
             const now = new Date()
             const timestamp = now.getTime()

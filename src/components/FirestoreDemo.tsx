@@ -40,6 +40,11 @@ export default function FirestoreDemo() {
   const { user } = useAuth()
 
   const fetchMessages = async () => {
+    if (!db) {
+      setError('Firestore not available')
+      return
+    }
+
     try {
       setRefreshing(true)
       setError('')  // Clear any existing errors
@@ -62,7 +67,7 @@ export default function FirestoreDemo() {
     } catch (error) {
       console.error('Error fetching messages:', error)
       setError('Failed to fetch messages. Please check your connection and try again.')
-      if ((error as any).code === 'permission-denied') {
+      if (error instanceof Error && 'code' in error && (error as { code: string }).code === 'permission-denied') {
         alert('Permission denied. Please ensure you are logged in and Firestore rules are configured correctly.')
       }
     } finally {
@@ -75,6 +80,11 @@ export default function FirestoreDemo() {
 
     if (!newMessage.trim() || !user) {
       console.log('Missing message or user:', { message: newMessage.trim(), user: user?.uid })
+      return
+    }
+
+    if (!db) {
+      setError('Firestore not available')
       return
     }
 
@@ -100,16 +110,21 @@ export default function FirestoreDemo() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSaveSuccess(false), 3000)
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding message:', error)
       setError('Failed to save message. Please try again.')
-      alert('Failed to add message: ' + (error as any).message)
+      alert('Failed to add message: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setLoading(false)
     }
   }
 
   const deleteMessage = async (messageId: string) => {
+    if (!db) {
+      alert('Firestore not available')
+      return
+    }
+
     try {
       await deleteDoc(doc(db, 'messages', messageId))
       await fetchMessages()
@@ -119,6 +134,11 @@ export default function FirestoreDemo() {
   }
 
   const clearMessages = async () => {
+    if (!db) {
+      alert('Firestore not available')
+      return
+    }
+
     try {
       setClearing(true)
       const snapshot = await getDocs(collection(db, 'messages'))

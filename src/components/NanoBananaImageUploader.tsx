@@ -70,6 +70,10 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
         throw new Error(message)
       }
 
+      if (!storage) {
+        throw new Error('Firebase Storage not available')
+      }
+
       const data = (await response.json()) as NanoBananaResponse
       const bytes = decodeBase64ToUint8Array(data.data)
       const now = new Date()
