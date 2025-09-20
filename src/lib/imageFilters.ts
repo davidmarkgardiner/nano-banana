@@ -8,6 +8,7 @@ export const applyFilterToImageDataUrl = async (
 ): Promise<string> =>
   new Promise((resolve, reject) => {
     if (filter === 'none') {
+      // Return original image without any processing to preserve quality
       resolve(sourceDataUrl)
       return
     }
@@ -56,7 +57,21 @@ export const applyFilterToImageDataUrl = async (
       }
 
       context.putImageData(imageData, 0, 0)
-      resolve(canvas.toDataURL('image/png'))
+
+      // Detect original format from data URL and use appropriate output format
+      const isOriginalJpeg = sourceDataUrl.startsWith('data:image/jpeg')
+      const isOriginalPng = sourceDataUrl.startsWith('data:image/png')
+
+      if (isOriginalJpeg) {
+        // Use high-quality JPEG (95% quality) for JPEG sources
+        resolve(canvas.toDataURL('image/jpeg', 0.95))
+      } else if (isOriginalPng) {
+        // Use PNG for PNG sources to preserve transparency
+        resolve(canvas.toDataURL('image/png'))
+      } else {
+        // Default to high-quality JPEG for other formats
+        resolve(canvas.toDataURL('image/jpeg', 0.95))
+      }
     }
 
     imageElement.onerror = () => {
