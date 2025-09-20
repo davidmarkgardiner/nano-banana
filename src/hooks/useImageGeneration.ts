@@ -7,6 +7,34 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 
+const MAX_PROMPT_SLUG_LENGTH = 60
+
+const createPromptSlug = (text: string): string => {
+  const normalized = text
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/-+/g, '-')
+
+  if (!normalized) {
+    return 'image'
+  }
+
+  const abbreviated = normalized
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 6)
+    .join('-')
+    .replace(/-+/g, '-')
+
+  const slug = abbreviated.slice(0, MAX_PROMPT_SLUG_LENGTH).replace(/^-+|-+$/g, '')
+
+  return slug || 'image'
+}
+
+const formatTwoDigits = (value: number): string => value.toString().padStart(2, '0')
+
 export function useImageGeneration(): UseImageGenerationReturn {
   const { user } = useAuth()
   const [prompt, setPrompt] = useState('')
@@ -67,7 +95,9 @@ export function useImageGeneration(): UseImageGenerationReturn {
             // Create storage path
             const now = new Date()
             const timestamp = now.getTime()
-            const path = `nano-banana/${user.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${timestamp}`
+            const promptSlug = createPromptSlug(prompt)
+            const dateSegment = `${now.getFullYear()}-${formatTwoDigits(now.getMonth() + 1)}-${formatTwoDigits(now.getDate())}`
+            const path = `nano-banana/${user.uid}/${dateSegment}-${promptSlug}-${timestamp}`
 
             // Upload to Firebase Storage
             const storageRef = ref(storage, path)
