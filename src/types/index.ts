@@ -14,6 +14,7 @@ export interface ImageMetadata {
     height: number
   }
   generatedAt: Date
+  prompt?: string
 }
 
 export interface ImageGenerationState {
@@ -46,7 +47,7 @@ export interface UseImageGenerationReturn {
   generatedImage: string | null
   isLoading: boolean
   error: string | null
-  generateImage: () => Promise<void>
+  generateImage: (promptOverride?: string) => Promise<void>
   clearError: () => void
   reset: () => void
 }

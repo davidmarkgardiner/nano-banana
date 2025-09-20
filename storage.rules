@@ -9,14 +9,9 @@ service firebase.storage {
       allow read, write: if true;
     }
     
-    // Users can read and write their own images in the nano-banana folder
-    match /nano-banana/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Allow authenticated users to read any nano-banana images for sharing
-    match /nano-banana/{userId}/{allPaths=**} {
-      allow read: if request.auth != null;
+    // Allow authenticated users to read and write images in the nano-banana folder
+    match /nano-banana/{date}/{allPaths=**} {
+      allow read, write: if request.auth != null;
     }
 
     // Deny all other access
