@@ -43,6 +43,7 @@ export default function FirestoreDemo() {
     try {
       setRefreshing(true)
       setError('')  // Clear any existing errors
+      console.log('Fetching messages...')
       const q = query(collection(db, 'messages'), orderBy('timestamp', 'desc'))
       const querySnapshot = await getDocs(q)
       const messageList: Message[] = []
@@ -56,10 +57,14 @@ export default function FirestoreDemo() {
         })
       })
 
+      console.log('Fetched messages:', messageList.length)
       setMessages(messageList)
     } catch (error) {
       console.error('Error fetching messages:', error)
       setError('Failed to fetch messages. Please check your connection and try again.')
+      if ((error as any).code === 'permission-denied') {
+        alert('Permission denied. Please ensure you are logged in and Firestore rules are configured correctly.')
+      }
     } finally {
       setRefreshing(false)
     }
@@ -68,19 +73,26 @@ export default function FirestoreDemo() {
   const addMessage = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!newMessage.trim() || !user) return
+    if (!newMessage.trim() || !user) {
+      console.log('Missing message or user:', { message: newMessage.trim(), user: user?.uid })
+      return
+    }
 
     try {
       setLoading(true)
       setError('')
       setSaveSuccess(false)
+      console.log('Adding message with user:', user.uid)
 
-      await addDoc(collection(db, 'messages'), {
+      const docData = {
         text: newMessage,
         timestamp: new Date(),
         userId: user.uid,
-        userEmail: user.email
-      })
+        userEmail: user.email || 'unknown@example.com'
+      }
+
+      console.log('Document data:', docData)
+      await addDoc(collection(db, 'messages'), docData)
 
       setNewMessage('')
       setSaveSuccess(true)
@@ -91,6 +103,7 @@ export default function FirestoreDemo() {
     } catch (error: any) {
       console.error('Error adding message:', error)
       setError('Failed to save message. Please try again.')
+      alert('Failed to add message: ' + (error as any).message)
     } finally {
       setLoading(false)
     }
