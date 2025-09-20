@@ -101,7 +101,7 @@ class NanoBananaAPIClient implements NanoBananaAPI {
       let data
       try {
         data = await response.json()
-      } catch (jsonError) {
+      } catch {
         const text = await response.text()
         console.error('Non-JSON response:', text)
         throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
@@ -136,7 +136,7 @@ class NanoBananaAPIClient implements NanoBananaAPI {
       let data
       try {
         data = await response.json()
-      } catch (jsonError) {
+      } catch {
         const text = await response.text()
         console.error('Non-JSON response:', text)
         throw new Error(`Server returned invalid response: ${response.status} ${response.statusText}`)
@@ -171,7 +171,7 @@ class NanoBananaAPIClient implements NanoBananaAPI {
       let data
       try {
         data = await response.json()
-      } catch (jsonError) {
+      } catch {
         // If response is not JSON, get text for better error reporting
         const text = await response.text()
         console.error('Non-JSON response:', text)
