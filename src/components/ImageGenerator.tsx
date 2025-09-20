@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { User } from 'firebase/auth'
 import { useImageGeneration } from '@/hooks/useImageGeneration'
 import TextPromptInput from '@/components/TextPromptInput'
@@ -12,23 +13,6 @@ interface ImageGeneratorProps {
   onLogout: () => Promise<void>
 }
 
-const samplePrompts = [
-  {
-    label: 'Neon city rain',
-    prompt:
-      'Neon cyberpunk street at night with rain-slick reflections, glowing holographic signs, and umbrellas in motion'
-  },
-  {
-    label: 'Astronaut escape',
-    prompt:
-      'An astronaut relaxing in a hammock on a tropical beach at sunset, painted in vibrant watercolor strokes'
-  },
-  {
-    label: 'Cozy reading nook',
-    prompt:
-      'Golden morning light illuminating a cozy reading nook filled with lush plants, vintage books, and a sleeping cat'
-  }
-]
 
 const quickTips = [
   {
@@ -58,6 +42,7 @@ const highlightPills = [
 ]
 
 export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) {
+  const [tipsExpanded, setTipsExpanded] = useState(false)
   const {
     prompt,
     setPrompt,
@@ -78,14 +63,6 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
     reset()
   }
 
-  const handleSamplePromptSelect = (value: string) => {
-    if (isLoading) {
-      return
-    }
-    clearError()
-    setPrompt(value)
-    void generateImage(value)
-  }
 
   const handlePromptInspirationUse = (value: string) => {
     if (isLoading) {
@@ -139,31 +116,8 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               ))}
             </div>
 
-            <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} />
+            <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} className="max-w-2xl mx-auto" />
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left shadow-lg backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
-                  Prompt inspiration
-                </p>
-                <span className="text-[10px] font-medium text-slate-200/70">Tap to fill the editor</span>
-              </div>
-              <div className="mt-3 grid gap-2">
-                {samplePrompts.map((sample) => (
-                  <button
-                    key={sample.label}
-                    type="button"
-                    onClick={() => handleSamplePromptSelect(sample.prompt)}
-                    className="group rounded-xl border border-white/10 bg-slate-900/40 px-4 py-3 text-left transition hover:border-white/40 hover:bg-slate-900/60"
-                  >
-                    <p className="text-sm font-semibold text-white">{sample.label}</p>
-                    <p className="mt-1 text-xs text-slate-200/80 group-hover:text-slate-100">
-                      {sample.prompt}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <TextPromptInput
               value={prompt}
@@ -204,32 +158,54 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
 
       {shouldShowTips && (
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-16 lg:px-12">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-2xl">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-100">Quick guidance</p>
-                <h3 className="mt-3 text-2xl font-semibold text-white">
-                  Craft prompts that glow with detail
-                </h3>
-                <p className="mt-2 max-w-2xl text-sm text-slate-200/80">
-                  These tips help the model understand what matters most in your scene. Try combining them with the inspiration prompts above for instant results.
-                </p>
+          <div
+            className="rounded-3xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur-2xl transition-all duration-300 cursor-pointer"
+            onMouseEnter={() => setTipsExpanded(true)}
+            onMouseLeave={() => setTipsExpanded(false)}
+            onClick={() => setTipsExpanded(!tipsExpanded)}
+          >
+            <div className="p-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.3em] text-sky-100">Quick guidance</p>
+                  <h3 className="mt-3 text-2xl font-semibold text-white">
+                    Craft prompts that glow with detail
+                  </h3>
+                  {!tipsExpanded && (
+                    <p className="mt-2 text-sm text-slate-200/60">
+                      Hover or click to see helpful tips
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xl transition-transform duration-300 ${tipsExpanded ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </div>
               </div>
-              <div className="grid w-full gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {quickTips.map((tip) => (
-                  <div
-                    key={tip.title}
-                    className={`rounded-2xl border border-white/10 bg-gradient-to-br ${tip.accent} p-5 text-left shadow-lg backdrop-blur-xl`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl">{tip.icon}</span>
-                      <span className="h-2 w-2 rounded-full bg-white/60" />
-                    </div>
-                    <h4 className="mt-4 text-base font-semibold text-white">{tip.title}</h4>
-                    <p className="mt-2 text-sm text-slate-100/80">{tip.description}</p>
+
+              {tipsExpanded && (
+                <div className="mt-6 space-y-6">
+                  <p className="max-w-2xl text-sm text-slate-200/80">
+                    These tips help the model understand what matters most in your scene. Try combining them with the inspiration prompts above for instant results.
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {quickTips.map((tip) => (
+                      <div
+                        key={tip.title}
+                        className={`rounded-2xl border border-white/10 bg-gradient-to-br ${tip.accent} p-5 text-left shadow-lg backdrop-blur-xl`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl">{tip.icon}</span>
+                          <span className="h-2 w-2 rounded-full bg-white/60" />
+                        </div>
+                        <h4 className="mt-4 text-base font-semibold text-white">{tip.title}</h4>
+                        <p className="mt-2 text-sm text-slate-100/80">{tip.description}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -7,13 +7,14 @@ import type { PromptSuggestionResponse } from '@/types'
 interface PromptInspirationProps {
   onUsePrompt: (prompt: string) => void
   isGenerating?: boolean
+  className?: string
 }
 
 function sanitizePromptText(text: string): string {
   return text.replace(/\s+/g, ' ').trim()
 }
 
-export default function PromptInspiration({ onUsePrompt, isGenerating = false }: PromptInspirationProps) {
+export default function PromptInspiration({ onUsePrompt, isGenerating = false, className }: PromptInspirationProps) {
   const initialSuggestion = useMemo(() => getRandomPromptSuggestion(), [])
   const [suggestion, setSuggestion] = useState<string>(initialSuggestion)
   const [source, setSource] = useState<'gemini' | 'fallback'>('fallback')
@@ -66,7 +67,7 @@ export default function PromptInspiration({ onUsePrompt, isGenerating = false }:
   }, [isLoading, onUsePrompt, suggestion])
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg backdrop-blur-xl">
+    <div className={`rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg backdrop-blur-xl ${className || ''}`}>
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">

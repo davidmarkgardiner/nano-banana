@@ -52,9 +52,11 @@ export async function GET() {
     const model = genAI.getGenerativeModel({ model: DEFAULT_PROMPT_MODEL })
 
     const generationPrompt = [
-      'Create a unique, imaginative text-to-image prompt for an AI art generator.',
-      'Choose a random subject, setting, and art style each time you are asked.',
-      'Describe mood, lighting, and medium in 25-40 words.',
+      'Create a unique, realistic text-to-image prompt for an AI art generator.',
+      'Focus on photographic, lifelike images with real people, places, objects, or nature scenes.',
+      'Avoid fantasy creatures, cartoons, paintings, or fictional elements.',
+      'Choose realistic subjects like portraits, landscapes, street photography, architecture, wildlife, or everyday scenes.',
+      'Describe natural lighting, realistic colors, and photographic style in 25-40 words.',
       'Return only the prompt sentence without numbering, prefixes, or additional commentary.'
     ].join(' ')
 
