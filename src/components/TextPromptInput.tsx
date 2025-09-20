@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, KeyboardEvent } from 'react'
+import ImageUploadButton from '@/components/ImageUploadButton'
 
 interface TextPromptInputProps {
   value: string
@@ -108,34 +109,42 @@ export default function TextPromptInput({
       {/* Submit Section */}
       <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Keyboard Shortcut Hint */}
-        <div className="text-sm text-gray-500 dark:text-gray-400 order-2 sm:order-1">
+        <div className="text-sm text-gray-500 dark:text-gray-400 order-3 sm:order-1">
           Press <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">⌘ + Enter</kbd> to generate
         </div>
-        
-        {/* Generate Button */}
-        <button
-          onClick={handleSubmit}
-          disabled={isLoading || !value.trim() || isOverLimit}
-          className={`
-            px-8 py-3 rounded-lg font-medium transition-all duration-200 order-1 sm:order-2
-            ${isLoading || !value.trim() || isOverLimit
-              ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-            }
-            min-w-[120px] flex items-center justify-center
-          `}
-        >
-          {isLoading ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-              Generating...
-            </>
-          ) : (
-            <>
-              🎨 Generate
-            </>
-          )}
-        </button>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 order-1 sm:order-2">
+          {/* Upload Button */}
+          <ImageUploadButton
+            isDisabled={isLoading}
+          />
+
+          {/* Generate Button */}
+          <button
+            onClick={handleSubmit}
+            disabled={isLoading || !value.trim() || isOverLimit}
+            className={`
+              px-8 py-3 rounded-lg font-medium transition-all duration-200
+              ${isLoading || !value.trim() || isOverLimit
+                ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+              }
+              min-w-[120px] flex items-center justify-center
+            `}
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                Generating...
+              </>
+            ) : (
+              <>
+                🎨 Generate
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Tips */}
