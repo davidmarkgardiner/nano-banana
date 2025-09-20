@@ -1,16 +1,32 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
+import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc, Timestamp } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 
 interface Message {
   id: string
   text: string
-  timestamp: any
+  timestamp?: Timestamp | Date
   userId: string
   userEmail: string
+}
+
+const formatTimestamp = (timestamp?: Message['timestamp']): string => {
+  if (!timestamp) {
+    return 'Just now'
+  }
+
+  if (timestamp instanceof Date) {
+    return timestamp.toLocaleString()
+  }
+
+  if (timestamp instanceof Timestamp) {
+    return timestamp.toDate().toLocaleString()
+  }
+
+  return 'Just now'
 }
 
 export default function FirestoreDemo() {
@@ -31,11 +47,13 @@ export default function FirestoreDemo() {
       const querySnapshot = await getDocs(q)
       const messageList: Message[] = []
 
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach((messageDoc) => {
+        const data = messageDoc.data() as Omit<Message, 'id'>
+
         messageList.push({
-          id: doc.id,
-          ...doc.data()
-        } as Message)
+          id: messageDoc.id,
+          ...data,
+        })
       })
 
       setMessages(messageList)
@@ -108,107 +126,119 @@ export default function FirestoreDemo() {
 
   if (!user) {
     return (
-      <div className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-        <h3 className="text-xl font-bold mb-4">Firestore Demo</h3>
-        <p className="text-gray-600">Please login to use the messaging feature.</p>
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-slate-100 shadow-xl backdrop-blur-xl">
+        <div className="pointer-events-none absolute -top-16 right-0 h-48 w-48 rounded-full bg-indigo-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-10 h-40 w-40 rounded-full bg-sky-500/20 blur-3xl" />
+
+        <div className="relative">
+          <h3 className="text-xl font-semibold text-white">Firestore Demo</h3>
+          <p className="mt-3 text-sm text-slate-300">Please login to use the messaging feature.</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-      <h3 className="text-xl font-bold mb-4">💾 Text Data Storage</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-        Test the database connection by saving and retrieving text data. Your messages persist across sessions.
-      </p>
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-slate-100 shadow-xl backdrop-blur-xl">
+      <div className="pointer-events-none absolute -top-24 right-8 h-48 w-48 rounded-full bg-purple-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-sky-500/20 blur-3xl" />
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded dark:bg-red-900 dark:border-red-600 dark:text-red-300">
-          {error}
-        </div>
-      )}
+      <div className="relative">
+        <h3 className="text-xl font-semibold text-white">💾 Text Data Storage</h3>
+        <p className="mt-2 text-sm text-slate-300">
+          Test the database connection by saving and retrieving text data. Your messages persist across sessions.
+        </p>
 
-      {saveSuccess && (
-        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded dark:bg-green-900 dark:border-green-600 dark:text-green-300">
-          Message saved successfully!
-        </div>
-      )}
-
-      <form onSubmit={addMessage} className="mb-6">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Enter your text data to save..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
-            data-testid="text-input"
-          />
-          <button
-            type="submit"
-            disabled={loading || !newMessage.trim()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-            data-testid="save-button"
-          >
-            {loading ? 'Saving...' : 'Save'}
-          </button>
-        </div>
-      </form>
-
-      <div className="space-y-3">
-        {messages.length === 0 ? (
-          <p className="text-gray-500 text-center py-8" data-testid="no-messages">No saved data yet. Add your first message!</p>
-        ) : (
-          messages.map((message) => (
-            <div key={message.id} className="p-3 border border-gray-200 rounded-md dark:border-gray-600" data-testid="saved-message">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {message.userEmail} • {message.timestamp?.toDate?.()?.toLocaleDateString() || 'Unknown date'}
-                  </p>
-                  <p className="mt-1">{message.text}</p>
-                </div>
-                {user.uid === message.userId && (
-                  <button
-                    onClick={() => deleteMessage(message.id)}
-                    className="ml-2 px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
+        {error && (
+          <div className="mt-4 rounded-2xl border border-red-400/50 bg-red-500/20 p-3 text-red-200">
+            {error}
+          </div>
         )}
-      </div>
 
-      <div className="flex gap-2 mt-4">
-        <button
-          onClick={fetchMessages}
-          disabled={refreshing}
-          className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          data-testid="refresh-button"
-        >
-          {refreshing ? (
-            <span className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Refreshing...
-            </span>
+        {saveSuccess && (
+          <div className="mt-4 rounded-2xl border border-green-400/50 bg-green-500/20 p-3 text-green-200">
+            Message saved successfully!
+          </div>
+        )}
+
+        <form onSubmit={addMessage} className="mt-6">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Enter your text data to save..."
+              className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400"
+              data-testid="text-input"
+            />
+            <button
+              type="submit"
+              disabled={loading || !newMessage.trim()}
+              className="rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:shadow-xl hover:shadow-sky-500/40 disabled:opacity-50"
+              data-testid="save-button"
+            >
+              {loading ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </form>
+
+        <div className="mt-6 space-y-3">
+          {messages.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-white/10 bg-white/5 py-6 text-center text-sm text-slate-300" data-testid="no-messages">
+              No saved data yet. Add your first message!
+            </p>
           ) : (
-            'Refresh Messages'
+            messages.map((message) => (
+              <div key={message.id} className="rounded-2xl border border-white/10 bg-white/10 p-4" data-testid="saved-message">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-300">
+                      {message.userEmail} • {formatTimestamp(message.timestamp)}
+                    </p>
+                    <p className="mt-2 text-sm text-slate-100">{message.text}</p>
+                  </div>
+                  {user.uid === message.userId && (
+                    <button
+                      onClick={() => deleteMessage(message.id)}
+                      className="self-start rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-rose-100 transition hover:border-rose-300/50 hover:bg-rose-500/20"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
           )}
-        </button>
+        </div>
 
-        {messages.length > 0 && (
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button
-            onClick={clearMessages}
-            disabled={clearing}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            data-testid="clear-button"
+            onClick={fetchMessages}
+            disabled={refreshing}
+            className="flex-1 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:border-white/30 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="refresh-button"
           >
-            {clearing ? 'Clearing...' : 'Clear All'}
+            {refreshing ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Refreshing...
+              </span>
+            ) : (
+              'Refresh Messages'
+            )}
           </button>
-        )}
+
+          {messages.length > 0 && (
+            <button
+              onClick={clearMessages}
+              disabled={clearing}
+              className="flex-1 rounded-full border border-red-400/50 bg-red-500/20 px-4 py-3 text-sm font-semibold text-red-200 transition hover:border-red-400/70 hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="clear-button"
+            >
+              {clearing ? 'Clearing...' : 'Clear All'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
