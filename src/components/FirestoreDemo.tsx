@@ -17,6 +17,7 @@ export default function FirestoreDemo() {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(false)
+  const [clearing, setClearing] = useState(false)
   const { user } = useAuth()
 
   const fetchMessages = async () => {
@@ -67,6 +68,21 @@ export default function FirestoreDemo() {
       await fetchMessages()
     } catch (error) {
       console.error('Error deleting message:', error)
+    }
+  }
+
+  const clearMessages = async () => {
+    try {
+      setClearing(true)
+      const snapshot = await getDocs(collection(db, 'messages'))
+      const deletePromises = snapshot.docs.map((messageDoc) => deleteDoc(messageDoc.ref))
+
+      await Promise.all(deletePromises)
+      await fetchMessages()
+    } catch (error) {
+      console.error('Error clearing messages:', error)
+    } finally {
+      setClearing(false)
     }
   }
 
@@ -134,10 +150,11 @@ export default function FirestoreDemo() {
       </div>
 
       <button
-        onClick={fetchMessages}
-        className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+        onClick={clearMessages}
+        disabled={clearing}
+        className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
       >
-        Refresh Messages
+        {clearing ? 'Clearing...' : 'Refresh Messages'}
       </button>
     </div>
   )
