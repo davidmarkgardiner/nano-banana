@@ -7,6 +7,8 @@ import { storage } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 import { useCanvasImage } from '@/context/CanvasImageContext'
 import { ImageFilter } from '@/lib/imageFilters'
+import { useUploadRetry } from '@/hooks/useUploadRetry'
+import { uploadWithProgress, validateImageFile, compressImage, generateUploadPath } from '@/lib/uploadUtils'
 
 interface NanoBananaResponse {
   contentType: string
@@ -40,16 +42,20 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
   } = useCanvasImage()
   const [imageUrl, setImageUrl] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState('')
   const [storagePath, setStoragePath] = useState('')
   const [downloadUrl, setDownloadUrl] = useState('')
   const [localFile, setLocalFile] = useState<File | null>(null)
   const [localError, setLocalError] = useState('')
   const [localUploading, setLocalUploading] = useState(false)
+  const [localUploadProgress, setLocalUploadProgress] = useState(0)
   const [originalStoragePath, setOriginalStoragePath] = useState('')
   const [processedStoragePath, setProcessedStoragePath] = useState('')
   const [originalDownloadUrl, setOriginalDownloadUrl] = useState('')
   const [processedDownloadUrl, setProcessedDownloadUrl] = useState('')
+  const { executeWithRetry: executeApiRetry } = useUploadRetry({ maxRetries: 3 })
+  const { executeWithRetry: executeFirebaseRetry } = useUploadRetry({ maxRetries: 2 })
 
   const isUploadedImageActive = currentImage?.source === 'uploaded'
   const uploadedOriginalPreview = isUploadedImageActive
@@ -74,15 +80,24 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
 
     try {
       setUploading(true)
+      setUploadProgress(0)
       setError('')
       setStoragePath('')
       setDownloadUrl('')
+
+      // Simulate upload progress for API call
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90))
+      }, 100)
 
       const response = await fetch('/api/nano-banana-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl: imageUrl.trim() })
       })
+      
+      clearInterval(progressInterval)
+      setUploadProgress(95)
 
       if (!response.ok) {
         let message = 'Unable to fetch the Nano Banana image.'
@@ -113,8 +128,12 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       const path = `nano-banana/${user?.uid}/${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getTime()}`
       const storageReference = ref(storage, path)
 
+      // Upload with progress tracking
+      setUploadProgress(98)
       await uploadBytes(storageReference, bytes, { contentType: data.contentType })
+      setUploadProgress(99)
       const url = await getDownloadURL(storageReference)
+      setUploadProgress(100)
 
       setStoragePath(path)
       setDownloadUrl(url)
@@ -124,10 +143,11 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       setError(uploadError instanceof Error ? uploadError.message : 'Failed to store Nano Banana image.')
     } finally {
       setUploading(false)
+      setTimeout(() => setUploadProgress(0), 1000)
     }
   }
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
 
     setLocalError('')
@@ -144,8 +164,9 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       return
     }
 
-    if (!file.type.startsWith('image/')) {
-      setLocalError('Only image files can be uploaded.')
+    const validation = validateImageFile(file)
+    if (!validation.isValid) {
+      setLocalError(validation.error || 'Invalid file')
       setLocalFile(null)
       if (isUploadedImageActive) {
         clearImage()
@@ -153,16 +174,18 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       return
     }
 
+    // Auto-compress large files
+    let processedFile = file
     if (file.size > 10 * 1024 * 1024) {
-      setLocalError('Please select an image that is 10MB or smaller.')
-      setLocalFile(null)
-      if (isUploadedImageActive) {
-        clearImage()
+      try {
+        const compressed = await compressImage(file, 1920, 1920, 0.8)
+        processedFile = new File([compressed], file.name, { type: 'image/jpeg' })
+      } catch (compressionError) {
+        console.warn('Compression failed, using original file:', compressionError)
       }
-      return
     }
 
-    setLocalFile(file)
+    setLocalFile(processedFile)
     const reader = new FileReader()
     reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : ''
@@ -177,7 +200,7 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       }
 
       void showUploadedImage(result, {
-        prompt: file.name,
+        prompt: processedFile.name,
         initialFilter: 'grayscale',
       }).catch((processingError: unknown) => {
         console.error('Failed to prepare uploaded image:', processingError)
@@ -195,7 +218,7 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
         clearImage()
       }
     }
-    reader.readAsDataURL(file)
+    reader.readAsDataURL(processedFile)
   }
 
   const handleLocalUpload = async (event: FormEvent<HTMLFormElement>) => {
@@ -231,6 +254,7 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
 
     try {
       setLocalUploading(true)
+      setLocalUploadProgress(0)
       setLocalError('')
       setOriginalStoragePath('')
       setProcessedStoragePath('')
@@ -245,19 +269,24 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       const originalPath = `${basePath}/original.${originalExtension}`
       const originalRef = ref(storage, originalPath)
 
+      setLocalUploadProgress(25)
       await uploadBytes(originalRef, localFile, { contentType: localFile.type })
+      setLocalUploadProgress(50)
 
       const processedBlob = await (await fetch(processedPreview)).blob()
       const processedExtension = processedBlob.type.split('/')[1] ?? 'png'
       const processedPath = `${basePath}/processed-${filter}.${processedExtension}`
       const processedRef = ref(storage, processedPath)
 
+      setLocalUploadProgress(75)
       await uploadBytes(processedRef, processedBlob, { contentType: processedBlob.type })
+      setLocalUploadProgress(90)
 
       const [originalUrl, processedUrl] = await Promise.all([
         getDownloadURL(originalRef),
         getDownloadURL(processedRef),
       ])
+      setLocalUploadProgress(100)
 
       setOriginalStoragePath(originalPath)
       setProcessedStoragePath(processedPath)
@@ -270,6 +299,7 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
       )
     } finally {
       setLocalUploading(false)
+      setTimeout(() => setLocalUploadProgress(0), 1000)
     }
   }
 
@@ -306,13 +336,23 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={uploading}
-            className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {uploading ? 'Saving to Firebase…' : 'Save to Firebase Storage'}
-          </button>
+          <div className="relative">
+            <button
+              type="submit"
+              disabled={uploading}
+              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 relative overflow-hidden min-w-[200px]"
+            >
+              {uploading && (
+                <div 
+                  className="absolute inset-0 bg-blue-400 transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              )}
+              <span className="relative z-10">
+                {uploading ? `Saving ${uploadProgress}%` : 'Save to Firebase Storage'}
+              </span>
+            </button>
+          </div>
         </form>
 
         {(storagePath || downloadUrl) && (
@@ -424,19 +464,29 @@ export default function NanoBananaImageUploader(): JSX.Element | null {
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={
-              !localFile ||
-              !isUploadedImageActive ||
-              !uploadedProcessedPreview ||
-              localUploading ||
-              isProcessing
-            }
-            className="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
-          >
-            {localUploading ? 'Uploading images…' : 'Upload both versions'}
-          </button>
+          <div className="relative">
+            <button
+              type="submit"
+              disabled={
+                !localFile ||
+                !isUploadedImageActive ||
+                !uploadedProcessedPreview ||
+                localUploading ||
+                isProcessing
+              }
+              className="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 relative overflow-hidden min-w-[180px]"
+            >
+              {localUploading && (
+                <div 
+                  className="absolute inset-0 bg-emerald-400 transition-all duration-300 ease-out"
+                  style={{ width: `${localUploadProgress}%` }}
+                />
+              )}
+              <span className="relative z-10">
+                {localUploading ? `Uploading ${localUploadProgress}%` : 'Upload both versions'}
+              </span>
+            </button>
+          </div>
         </form>
 
         {(originalDownloadUrl || processedDownloadUrl) && (
