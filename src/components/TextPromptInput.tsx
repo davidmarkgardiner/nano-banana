@@ -125,22 +125,25 @@ export default function TextPromptInput({
             onClick={handleSubmit}
             disabled={isLoading || !value.trim() || isOverLimit}
             className={`
-              px-8 py-3 rounded-lg font-medium transition-all duration-200
+              px-12 py-4 rounded-xl font-bold text-lg transition-all duration-300 relative overflow-hidden
               ${isLoading || !value.trim() || isOverLimit
                 ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                : 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white shadow-2xl hover:shadow-3xl transform hover:scale-110 animate-pulse'
               }
-              min-w-[120px] flex items-center justify-center
+              min-w-[160px] flex items-center justify-center group
+              before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:translate-x-[-100%] before:animate-[shimmer_2s_infinite] before:skew-x-12
             `}
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                Generating...
+                <div className="animate-spin rounded-full h-5 w-5 border-3 border-white border-t-transparent mr-3"></div>
+                <span className="text-lg font-bold">Generating...</span>
               </>
             ) : (
               <>
-                🎨 Generate
+                <span className="text-2xl mr-2 group-hover:animate-bounce">✨</span>
+                <span className="text-lg font-bold tracking-wide">Generate</span>
+                <span className="text-2xl ml-2 group-hover:animate-bounce animation-delay-100">🎨</span>
               </>
             )}
           </button>

@@ -2,6 +2,7 @@
 
 import { Timestamp } from 'firebase/firestore'
 import { useAuth } from '@/context/AuthContext'
+import { useState } from 'react'
 
 const providerLabels: Record<string, string> = {
   'google.com': 'Google',
@@ -46,6 +47,7 @@ const formatTimestamp = (value?: Timestamp | null) => {
 
 export default function UserProfile() {
   const { user, approvalStatus, approvalRecord } = useAuth()
+  const [sessionIdCopied, setSessionIdCopied] = useState(false)
 
   if (!user) return null
 
@@ -103,9 +105,29 @@ export default function UserProfile() {
             <dd className="mt-2 text-sm text-slate-100">{primaryProvider}</dd>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
-            <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">Session ID</dt>
-            <dd className="mt-2 text-sm text-slate-100">{sessionId}</dd>
+          <div 
+            className="rounded-2xl border border-white/10 bg-slate-900/40 p-4 cursor-pointer transition-all duration-300 hover:border-sky-400/50 hover:bg-slate-800/60 hover:shadow-lg hover:shadow-sky-500/20 group relative overflow-hidden"
+            onClick={() => {
+              navigator.clipboard.writeText(user.uid)
+              setSessionIdCopied(true)
+              setTimeout(() => setSessionIdCopied(false), 2000)
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-sky-400/10 to-transparent translate-x-[-100%] group-hover:animate-[shimmer_1.5s_ease-in-out] transition-all duration-300" />
+            <dt className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100 flex items-center gap-2">
+              <span className="animate-sparkle">✨</span>
+              Session ID
+              <span className="animate-sparkle animation-delay-100">💎</span>
+            </dt>
+            <dd className="mt-2 text-sm text-slate-100 font-mono tracking-wider group-hover:text-sky-200 transition-colors duration-200">
+              {sessionId}
+              {sessionIdCopied && (
+                <span className="ml-2 text-xs text-emerald-300 animate-pulse">Copied!</span>
+              )}
+            </dd>
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <span className="text-xs text-sky-300">📋 Click to copy</span>
+            </div>
           </div>
         </dl>
 
