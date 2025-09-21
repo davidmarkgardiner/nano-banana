@@ -54,6 +54,7 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_ADMIN_EMAILS=admin1@example.com,admin2@example.com
 GEMINI_API_KEY=your_gemini_api_key_here
 NEXT_PUBLIC_USE_REAL_API=false
 NEXT_PUBLIC_APP_URL=https://your-vercel-project-url.vercel.app
@@ -84,8 +85,12 @@ The floating 🤖 **Nano Assistant** helps users navigate the site and escalate 
 1. Create a project at [Firebase Console](https://console.firebase.google.com/)
 2. Enable Authentication with the Google provider (email/password is not used)
 3. Create a Firestore database
-4. (Optional) Create a `userApprovals` collection to track admin decisions
+4. Define your administrator allow-list:
+   - Update `NEXT_PUBLIC_FIREBASE_ADMIN_EMAILS` in `.env.local` with the lowercase emails that should auto-approve
+   - Mirror the same addresses inside [`firestore.rules`](firestore.rules) so only trusted admins can approve accounts
 5. Copy your configuration to `.env.local`
+
+> ℹ️ The app automatically creates a `userApprovals` document the first time a user signs in. Change its `status` to `approved` from the Firebase Console to unlock the protected areas of the app.
 
 ### 4. Run Development Server
 

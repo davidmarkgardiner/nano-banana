@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { collection, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+
 import { db } from '@/lib/firebase'
+import { isAdminEmail } from '@/lib/admin'
 import { useAuth } from '@/context/AuthContext'
 import type { UserApprovalRecord } from '@/context/AuthContext'
 
@@ -16,8 +18,8 @@ export default function AdminApprovals() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Simple admin check - you can modify this logic
-  const isAdmin = user?.email === 'davidmarkgardiner@gmail.com' // Replace with your email
+  // Determine admin access based on configured email allow-list
+  const isAdmin = isAdminEmail(user?.email)
 
   const fetchApprovals = async () => {
     if (!db) {

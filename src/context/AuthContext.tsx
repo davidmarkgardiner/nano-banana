@@ -2,8 +2,10 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
-import { Timestamp } from 'firebase/firestore'
-import { auth, googleProvider } from '@/lib/firebase'
+import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore'
+
+import { auth, googleProvider, db } from '@/lib/firebase'
+import { isAdminEmail } from '@/lib/admin'
 
 type UserApprovalState = 'pending' | 'approved' | 'rejected'
 export type ApprovalStatus = UserApprovalState | 'unknown'
@@ -66,23 +68,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return
     }
 
-    // TEMPORARY: Auto-approve all users to bypass Firebase permission issues
-    console.log('TEMPORARY: Auto-approving user', currentUser.email)
-    setApprovalStatus('approved')
-    setApprovalRecord({
-      status: 'approved',
-      email: currentUser.email ?? null,
-      displayName: currentUser.displayName ?? null,
-      requestedAt: null,
-      updatedAt: null,
-      approvedBy: 'system-bypass',
-      approvedAt: null,
-    })
-    setApprovalLoading(false)
-    return
+    setApprovalLoading(true)
 
-    // Original Firebase-based approval logic (temporarily disabled)
-    /*
     if (!db) {
       setApprovalStatus('pending')
       setApprovalRecord(null)
@@ -91,20 +78,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return
     }
 
-    setApprovalLoading(true)
     setApprovalError(null)
 
     try {
       const approvalRef = doc(db, 'userApprovals', currentUser.uid)
       const snapshot = await getDoc(approvalRef)
 
+      const autoApprove = isAdminEmail(currentUser.email)
+
       if (!snapshot.exists()) {
         const now = Timestamp.now()
-
-        // Auto-approve certain admin emails
-        const adminEmails = ['davidmarkgardiner@gmail.com'] // Add your email here
-        const isAutoApproved = currentUser.email && adminEmails.includes(currentUser.email)
-        const initialStatus = isAutoApproved ? 'approved' : 'pending'
+        const initialStatus: UserApprovalState = autoApprove ? 'approved' : 'pending'
 
         await setDoc(approvalRef, {
           status: initialStatus,
@@ -112,10 +96,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           displayName: currentUser.displayName ?? null,
           requestedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-          ...(isAutoApproved && {
-            approvedBy: 'system',
-            approvedAt: serverTimestamp()
-          })
+          ...(autoApprove && {
+            approvedBy: currentUser.email ?? 'system-auto',
+            approvedAt: serverTimestamp(),
+          }),
         })
 
         setApprovalStatus(initialStatus)
@@ -125,8 +109,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           displayName: currentUser.displayName ?? null,
           requestedAt: now,
           updatedAt: now,
-          approvedBy: isAutoApproved ? 'system' : null,
-          approvedAt: isAutoApproved ? now : null,
+          approvedBy: autoApprove ? currentUser.email ?? 'system-auto' : null,
+          approvedAt: autoApprove ? now : null,
         })
         return
       }
@@ -137,8 +121,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setApprovalStatus(status)
       setApprovalRecord({
         status,
-        email: data.email ?? currentUser.email ?? null,
-        displayName: data.displayName ?? currentUser.displayName ?? null,
+        email: (data.email as string | null | undefined) ?? currentUser.email ?? null,
+        displayName: (data.displayName as string | null | undefined) ?? currentUser.displayName ?? null,
         requestedAt: (data.requestedAt as Timestamp | undefined) ?? null,
         updatedAt: (data.updatedAt as Timestamp | undefined) ?? null,
         approvedBy: (data.approvedBy as string | undefined) ?? null,
@@ -151,7 +135,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } finally {
       setApprovalLoading(false)
     }
-    */
   }, [])
 
   const refreshApprovalStatus = useCallback(async () => {
