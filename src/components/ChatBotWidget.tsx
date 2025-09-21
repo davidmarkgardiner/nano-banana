@@ -168,14 +168,19 @@ export default function ChatBotWidget() {
     setIssueStatus({ type: 'idle' })
 
     try {
-      const response = await fetch('http://localhost:3002/api/report-issue', {
+      const response = await fetch('/api/report-issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: issueTitle.trim(),
           description: issueDescription.trim(),
-          conversationId: crypto.randomUUID(),
-          userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Unknown',
+          severity: issueSeverity,
+          category: issueCategory,
+          metadata: {
+            url: typeof window !== 'undefined' ? window.location.href : undefined,
+            browser: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            chatTranscript: chatTranscriptForIssue,
+          },
         }),
       })
 
