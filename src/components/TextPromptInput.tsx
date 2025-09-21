@@ -23,6 +23,7 @@ export default function TextPromptInput({
   className
 }: TextPromptInputProps) {
   const [isFocused, setIsFocused] = useState(false)
+  const [tipsExpanded, setTipsExpanded] = useState(false)
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -125,22 +126,25 @@ export default function TextPromptInput({
             onClick={handleSubmit}
             disabled={isLoading || !value.trim() || isOverLimit}
             className={`
-              px-8 py-3 rounded-lg font-medium transition-all duration-200
+              px-12 py-4 rounded-xl font-bold text-lg transition-all duration-300 relative overflow-hidden
               ${isLoading || !value.trim() || isOverLimit
                 ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+                : 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white shadow-2xl hover:shadow-3xl transform hover:scale-110 animate-pulse'
               }
-              min-w-[120px] flex items-center justify-center
+              min-w-[160px] flex items-center justify-center group
+              before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:translate-x-[-100%] before:animate-[shimmer_2s_infinite] before:skew-x-12
             `}
           >
             {isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                Generating...
+                <div className="animate-spin rounded-full h-5 w-5 border-3 border-white border-t-transparent mr-3"></div>
+                <span className="text-lg font-bold">Generating...</span>
               </>
             ) : (
               <>
-                🎨 Generate
+                <span className="text-2xl mr-2 group-hover:animate-bounce">✨</span>
+                <span className="text-lg font-bold tracking-wide">Generate</span>
+                <span className="text-2xl ml-2 group-hover:animate-bounce animation-delay-100">🎨</span>
               </>
             )}
           </button>
@@ -149,14 +153,68 @@ export default function TextPromptInput({
 
       {/* Tips */}
       {!error && value.length === 0 && (
-        <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">💡 Tips for better results:</h4>
-          <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-            <li>• Be specific about colors, lighting, and mood</li>
-            <li>• Mention the style (realistic, cartoon, artistic, etc.)</li>
-            <li>• Include details about composition and perspective</li>
-            <li>• Try: &quot;A cozy coffee shop interior with warm lighting and vintage furniture&quot;</li>
-          </ul>
+        <div className="mt-4">
+          <div
+            className="rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-2xl transition-all duration-300 cursor-pointer"
+            onMouseEnter={() => setTipsExpanded(true)}
+            onMouseLeave={() => setTipsExpanded(false)}
+            onClick={() => setTipsExpanded(!tipsExpanded)}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">💡 Quick tips</p>
+                  <h4 className="mt-2 text-lg font-semibold text-white">
+                    Craft prompts that create magic
+                  </h4>
+                  {!tipsExpanded && (
+                    <p className="mt-2 text-sm text-slate-200/60">
+                      Hover or click to see helpful tips
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-lg transition-transform duration-300 ${tipsExpanded ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </div>
+              </div>
+
+              {tipsExpanded && (
+                <div className="mt-6 space-y-4">
+                  <p className="text-sm text-slate-200/80">
+                    These tips help the AI understand exactly what you&apos;re envisioning for your image.
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-white/10 bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent p-4 text-left shadow-lg backdrop-blur-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-lg">🎨</span>
+                        <span className="h-2 w-2 rounded-full bg-white/60" />
+                      </div>
+                      <h5 className="text-sm font-semibold text-white mb-2">Be specific about style</h5>
+                      <p className="text-xs text-slate-100/80">Mention colors, lighting, mood, and artistic style (realistic, cartoon, etc.)</p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-gradient-to-br from-violet-500/20 via-violet-500/5 to-transparent p-4 text-left shadow-lg backdrop-blur-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-lg">📐</span>
+                        <span className="h-2 w-2 rounded-full bg-white/60" />
+                      </div>
+                      <h5 className="text-sm font-semibold text-white mb-2">Describe composition</h5>
+                      <p className="text-xs text-slate-100/80">Include details about perspective, framing, and what&apos;s in the foreground/background</p>
+                    </div>
+                    <div className="rounded-xl border border-white/10 bg-gradient-to-br from-cyan-500/20 via-cyan-500/5 to-transparent p-4 text-left shadow-lg backdrop-blur-xl sm:col-span-2">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-lg">✨</span>
+                        <span className="h-2 w-2 rounded-full bg-white/60" />
+                      </div>
+                      <h5 className="text-sm font-semibold text-white mb-2">Example prompt</h5>
+                      <p className="text-xs text-slate-100/80 italic">&quot;A cozy coffee shop interior with warm golden lighting, vintage wooden furniture, and plants by large windows, realistic style&quot;</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
