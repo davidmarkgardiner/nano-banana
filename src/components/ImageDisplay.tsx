@@ -268,9 +268,28 @@ export default function ImageDisplay({
         {/* Image Info */}
         {!isImageLoading && !imageError && prompt && (
           <div className={promptInfoClass}>
-            <p className="text-sm">
-              <span className={promptLabelClass}>{promptTitle}:</span> {prompt}
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm flex-1">
+                <span className={promptLabelClass}>{promptTitle}:</span> {prompt}
+              </p>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border flex-shrink-0 ${
+                promptTitle === 'Image details' || promptTitle?.toLowerCase().includes('upload')
+                  ? 'border-blue-400/40 bg-blue-400/10 text-blue-200'
+                  : 'border-green-400/40 bg-green-400/10 text-green-200'
+              }`}>
+                {promptTitle === 'Image details' || promptTitle?.toLowerCase().includes('upload') ? (
+                  <>
+                    <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                    User Upload
+                  </>
+                ) : (
+                  <>
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+                    AI Generated
+                  </>
+                )}
+              </span>
+            </div>
           </div>
         )}
       </div>

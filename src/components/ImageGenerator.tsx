@@ -142,9 +142,9 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-sky-200">
                 AI Canvas
               </span>
-              <h2 className="text-4xl font-semibold leading-tight text-white sm:text-5xl">
-                Create Your AI Image
-              </h2>
+              <h1 className="text-2xl font-semibold text-white sm:text-3xl">
+                Create your image using AI generated prompt
+              </h1>
               <p className="text-base text-slate-200/80">
                 Describe your vision and watch the canvas come alive with color, texture, and light in just a few seconds.
               </p>
@@ -165,6 +165,12 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
             <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} className="max-w-2xl mx-auto" />
 
             <ImageTransfusionPanel className="mx-auto w-full max-w-5xl" />
+
+            <div className="text-center lg:text-left">
+              <h2 className="text-4xl font-semibold leading-tight text-white sm:text-5xl">
+                Describe image you want or Upload your own and edit using AI
+              </h2>
+            </div>
 
             <TextPromptInput
               value={prompt}
@@ -248,9 +254,15 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
                     </div>
 
                     <form onSubmit={handleRemixSubmit} className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-[0_20px_60px_-30px_rgba(59,130,246,0.45)] backdrop-blur-xl">
-                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
-                        <span className="h-2 w-2 rounded-full bg-emerald-300" />
-                        Nano Banana edits
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
+                          <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                          Nano Banana edits
+                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border border-orange-400/40 bg-orange-400/10 text-orange-200">
+                          <span className="w-1.5 h-1.5 bg-orange-400 rounded-full"></span>
+                          Blended Content
+                        </span>
                       </div>
                       <h5 className="mt-3 text-lg font-semibold text-white">Describe the changes you need</h5>
                       <p className="mt-2 text-sm text-slate-200/70">

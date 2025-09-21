@@ -77,10 +77,23 @@ export default function PromptInspiration({ onUsePrompt, isGenerating = false }:
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">
-              AI Inspiration
+              AI inspiration
             </p>
-            <span className="text-[10px] font-medium text-slate-200/70">
-              {source === 'gemini' ? 'Generated with Gemini' : 'Curated example'}
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${source === 'gemini'
+              ? 'border-purple-400/40 bg-purple-400/10 text-purple-200'
+              : 'border-slate-400/40 bg-slate-400/10 text-slate-200'
+            }`}>
+              {source === 'gemini' ? (
+                <>
+                  <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+                  AI Generated
+                </>
+              ) : (
+                <>
+                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
+                  Human Curated
+                </>
+              )}
             </span>
           </div>
           <button

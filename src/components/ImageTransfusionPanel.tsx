@@ -173,8 +173,14 @@ export default function ImageTransfusionPanel({ className = '' }: ImageTransfusi
     >
       <div className="flex flex-col gap-6">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">Nano Banana transfusion</p>
-          <h3 className="mt-3 text-2xl font-semibold text-white">Blend two photos with matching accessories</h3>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-100">Nano Banana transfusion</p>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border border-orange-400/40 bg-orange-400/10 text-orange-200">
+              <span className="w-1.5 h-1.5 bg-orange-400 rounded-full"></span>
+              Blended Content
+            </span>
+          </div>
+          <h3 className="mt-3 text-2xl font-semibold text-white">Blend two photos</h3>
           <p className="mt-2 text-sm text-slate-200/80">
             Upload a base photo and a reference photo. Nano Banana will merge the reference details—like necklaces, rings, or
             hairstyles—into the base image.
@@ -200,9 +206,15 @@ export default function ImageTransfusionPanel({ className = '' }: ImageTransfusi
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label htmlFor="base-photo" className="text-sm font-semibold text-slate-100">
-                  Base photo
-                </label>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="base-photo" className="text-sm font-semibold text-slate-100">
+                    Base photo
+                  </label>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium border border-blue-400/40 bg-blue-400/10 text-blue-200">
+                    <span className="w-1 h-1 bg-blue-400 rounded-full"></span>
+                    Your Upload
+                  </span>
+                </div>
                 {baseName && (
                   <span className="text-xs text-slate-300/80">{baseName}</span>
                 )}
@@ -238,9 +250,15 @@ export default function ImageTransfusionPanel({ className = '' }: ImageTransfusi
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label htmlFor="reference-photo" className="text-sm font-semibold text-slate-100">
-                  Reference photo
-                </label>
+                <div className="flex items-center gap-2">
+                  <label htmlFor="reference-photo" className="text-sm font-semibold text-slate-100">
+                    Reference photo
+                  </label>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium border border-blue-400/40 bg-blue-400/10 text-blue-200">
+                    <span className="w-1 h-1 bg-blue-400 rounded-full"></span>
+                    Your Upload
+                  </span>
+                </div>
                 {referenceName && (
                   <span className="text-xs text-slate-300/80">{referenceName}</span>
                 )}

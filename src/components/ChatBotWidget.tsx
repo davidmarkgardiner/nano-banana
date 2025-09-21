@@ -241,13 +241,35 @@ export default function ChatBotWidget() {
         {messages.map((message, index) => (
           <div
             key={`${message.timestamp}-${index}`}
-            className={`rounded-2xl px-4 py-2 ${
-              message.role === 'assistant'
-                ? 'bg-white/5 text-slate-100'
-                : 'ml-auto bg-sky-500/90 text-white'
+            className={`${
+              message.role === 'assistant' ? 'space-y-2' : 'ml-auto'
             }`}
           >
-            {message.content}
+            {message.role === 'assistant' && (
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border border-purple-400/40 bg-purple-400/10 text-purple-200">
+                  <span className="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+                  AI Response
+                </span>
+              </div>
+            )}
+            <div
+              className={`rounded-2xl px-4 py-2 ${
+                message.role === 'assistant'
+                  ? 'bg-white/5 text-slate-100'
+                  : 'ml-auto bg-sky-500/90 text-white'
+              }`}
+            >
+              {message.content}
+            </div>
+            {message.role === 'user' && (
+              <div className="flex justify-end mt-1">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border border-blue-400/40 bg-blue-400/10 text-blue-200">
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                  Your Message
+                </span>
+              </div>
+            )}
           </div>
         ))}
         {chatError && (
