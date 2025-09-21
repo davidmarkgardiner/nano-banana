@@ -62,8 +62,8 @@ test.describe('Enhanced Approval System Bypass Tests', () => {
 
     try {
       // Step 1: Navigate to the app with longer timeout
-      console.log('Step 1: Navigating to http://localhost:3002...')
-      await page.goto('http://localhost:3002', {
+      console.log('Step 1: Navigating to http://localhost:3000...')
+      await page.goto('http://localhost:3000', {
         waitUntil: 'networkidle',
         timeout: 30000
       })
@@ -190,7 +190,7 @@ test.describe('Enhanced Approval System Bypass Tests', () => {
     console.log('\n=== Simple Content Verification ===')
 
     // Just check if we can load the page and get some content
-    await page.goto('http://localhost:3002')
+    await page.goto('http://localhost:3000')
     await page.waitForTimeout(3000)
 
     const title = await page.title()

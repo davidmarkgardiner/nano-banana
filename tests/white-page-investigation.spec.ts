@@ -21,7 +21,7 @@ test.describe('White Page Investigation', () => {
       errorMessages.push(`Request Failed: ${request.url()} - ${request.failure()?.errorText}`);
     });
 
-    console.log('🔍 Navigating to main page (http://localhost:3002)...');
+    console.log('🔍 Navigating to main page (http://localhost:3000)...');
 
     try {
       await page.goto('/', { waitUntil: 'networkidle' });
@@ -96,7 +96,7 @@ test.describe('White Page Investigation', () => {
       errorMessages.push(`Request Failed: ${request.url()} - ${request.failure()?.errorText}`);
     });
 
-    console.log('🔍 Navigating to test auth page (http://localhost:3002/test-auth)...');
+    console.log('🔍 Navigating to test auth page (http://localhost:3000/test-auth)...');
 
     try {
       await page.goto('/test-auth', { waitUntil: 'networkidle' });

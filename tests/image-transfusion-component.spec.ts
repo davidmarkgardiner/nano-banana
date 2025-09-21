@@ -4,7 +4,7 @@ test.describe('ImageTransfusionPanel Component', () => {
   test.beforeEach(async ({ page }) => {
     // For component testing, we'd need the component to be rendered
     // Since it requires authentication, we'll test the validation behavior
-    await page.goto('http://localhost:3002')
+    await page.goto('http://localhost:3000')
     await page.waitForLoadState('networkidle')
   })
 
@@ -37,7 +37,7 @@ test.describe('ImageTransfusionPanel Component', () => {
 
 test.describe('useImageTransfusion Hook', () => {
   test('should handle API errors properly', async ({ page }) => {
-    await page.goto('http://localhost:3002')
+    await page.goto('http://localhost:3000')
     await page.waitForLoadState('networkidle')
 
     // Test error handling in the hook
@@ -45,7 +45,7 @@ test.describe('useImageTransfusion Hook', () => {
   })
 
   test('should manage loading states correctly', async ({ page }) => {
-    await page.goto('http://localhost:3002')
+    await page.goto('http://localhost:3000')
     await page.waitForLoadState('networkidle')
 
     // Test loading state management
@@ -53,7 +53,7 @@ test.describe('useImageTransfusion Hook', () => {
   })
 
   test('should validate inputs before API calls', async ({ page }) => {
-    await page.goto('http://localhost:3002')
+    await page.goto('http://localhost:3000')
     await page.waitForLoadState('networkidle')
 
     // Test input validation logic

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Image Transfusion Feature - PR #17', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3002')
+    await page.goto('http://localhost:3000')
     await page.waitForLoadState('networkidle')
   })
 

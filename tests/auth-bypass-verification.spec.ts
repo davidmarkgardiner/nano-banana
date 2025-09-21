@@ -38,7 +38,7 @@ test.describe('Authentication Bypass Verification', () => {
 
     // Navigate to the app
     console.log('Step 1: Loading the application...')
-    await page.goto('http://localhost:3002', { waitUntil: 'networkidle' })
+    await page.goto('http://localhost:3000', { waitUntil: 'networkidle' })
     await page.waitForTimeout(3000)
 
     // Take initial screenshot
@@ -119,7 +119,7 @@ test.describe('Authentication Bypass Verification', () => {
   test('Attempt to trigger authentication and monitor bypass', async ({ page }) => {
     console.log('\n=== Trigger Authentication Test ===')
 
-    await page.goto('http://localhost:3002', { waitUntil: 'networkidle' })
+    await page.goto('http://localhost:3000', { waitUntil: 'networkidle' })
     await page.waitForTimeout(2000)
 
     // Look for Google sign-in button

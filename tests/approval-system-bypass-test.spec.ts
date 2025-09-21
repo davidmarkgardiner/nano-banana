@@ -74,8 +74,8 @@ test.describe('Approval System Bypass Tests', () => {
     console.log('\n=== Approval System Bypass Test ===')
 
     // Step 1: Navigate to the app
-    console.log('Step 1: Navigating to http://localhost:3002...')
-    await page.goto('http://localhost:3002', { waitUntil: 'networkidle' })
+    console.log('Step 1: Navigating to http://localhost:3000...')
+    await page.goto('http://localhost:3000', { waitUntil: 'networkidle' })
     await page.waitForTimeout(3000) // Wait for initial load
 
     // Step 2: Take initial screenshot

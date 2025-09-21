@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Debug PR #17 - Image Transfusion', () => {
   test('should take screenshot and check page content', async ({ page }) => {
-    await page.goto('http://localhost:3002')
+    await page.goto('http://localhost:3000')
     await page.waitForLoadState('networkidle')
 
     // Take a screenshot to see what's on the page
