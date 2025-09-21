@@ -164,6 +164,7 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
 
             <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} className="max-w-2xl mx-auto" />
 
+            <ImageTransfusionPanel className="mx-auto w-full max-w-5xl" />
 
             <TextPromptInput
               value={prompt}
@@ -305,7 +306,6 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
             </div>
           </div>
 
-          <ImageTransfusionPanel className="mx-auto w-full max-w-5xl" />
         </div>
       </div>
 
