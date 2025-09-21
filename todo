@@ -10,3 +10,57 @@ firebase auth, db, storage
 next.js
 vercel
 etc
+
+---
+
+idea is to have chat bot on webpage
+1. it can look at code/ knowledge base from gh repo and answer questions about app
+2. it can report bugs/ imporvements/ feedback 
+
+the chat from webpage will be sent to webhook in n8n
+this will answer the user with info or ask user for further information if needed
+
+if its general questions ai should consult knowledge base and if it cant find it then search the web.
+once info given to user knowlegge base should be updated
+
+from here if its bugs/ imporvements/ feedback this should be captured in github ticket and asssigned to @codex or @claude using the @tag
+
+@codex = improvements or bugs
+@claude = feedback
+
+cluade will create the n8n workflow
+codex will create the ui integration.
+
+the workflow will be chat with user via chat bot > repsond > if needed cerate ticket > assignt to ai agent > they will cerate pr > pr will be reviewd sing github action (already in place) > playright test will be run on https website > when both playright and pr review pass tests, the pr be approved > code will be merged to mian branch
+
+curl -X POST https://n8n.srv1021063.hstgr.cloud/webhook-test/chatbot \
+    -H "Content-Type: application/json" \
+    -d '{"message": "How do I setup the project?", "userId": "test-user"}'
+
+  curl -X POST https://n8n.srv1021063.hstgr.cloud/webhook-test/bug-report \
+    -H "Content-Type: application/json" \
+    -d '{"message": "This button could be bigger", "userId": "test-user"}'
+
+500 character limit is not enough
+<!-- --- stocks --- -->
+Nvidia - 90% AI accelerator market share, predicting $6T market cap ($247/share target, 38% upside)
+CoreWeave - Independent AI cloud platform, DCF fair value $218 vs current $112 (near 50% undervalued)
+AMD - Secondary AI GPU supplier, taking CPU market share from Intel, fair value ~$155
+Amazon - AWS dominance (31% cloud market share), fast-growing advertising business ($55B annually), Project Kuiper satellite constellation
+Arista - High-performance networking gear for AI data centers, 30% of 2025 revenue from AI networking
+ASML - Monopoly on EUV lithography machines, new High NA technology driving upgrade cycle
+PALANTIR
+MSFT
+APPLE
+GOOGL
+
+
+
+---
+chatbot
+
+ANTHROPIC_API_KEY=your_claude_api_key_here
+GITHUB_TOKEN=your_github_personal_access_token
+GITHUB_OWNER=your_github_username_or_org
+GITHUB_REPO=your_repository_name
+PORT=3001
