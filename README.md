@@ -15,6 +15,7 @@ A modern web application for generating AI images from text prompts, built with 
 - 🌙 **Dark Mode Support** - Automatic theme switching
 - 📱 **Responsive Design** - Mobile-first approach that works on all devices
 - 🔒 **TypeScript** - Full type safety and better developer experience
+- 🤖 **AI Assistant Chatbot** - Built-in helper that can answer questions using the repo knowledge base, optional web search, and file GitHub issues for bugs or feedback
 
 ### Planned Features (In Development)
 - 🎨 **AI Image Generation** - Generate images from text prompts using nano-banana API
@@ -56,7 +57,27 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 GEMINI_API_KEY=your_gemini_api_key_here
 NEXT_PUBLIC_USE_REAL_API=false
 NEXT_PUBLIC_APP_URL=https://your-vercel-project-url.vercel.app
+# Optional: Configure the chatbot assistant
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODEL=gpt-4o-mini
+# Or use Anthropic instead of OpenAI
+ANTHROPIC_API_KEY=your_anthropic_api_key
+ANTHROPIC_MODEL=claude-3-sonnet-20240229
+# Optional: Enable GitHub issue creation from the chatbot
+GITHUB_TOKEN=github_pat_goes_here
+GITHUB_OWNER=your-github-username-or-org
+GITHUB_REPO=your-repo-name
 ```
+
+### 2.1 Configure the Chatbot Assistant
+
+The floating 🤖 **Nano Assistant** helps users navigate the site and escalate problems. To enable it:
+
+1. Provide either an `OPENAI_API_KEY` or an `ANTHROPIC_API_KEY` (you can set both and the server will fall back automatically).
+2. Optionally override `OPENAI_MODEL` or `ANTHROPIC_MODEL` if you want to target a specific model family.
+3. (Optional) Supply `GITHUB_TOKEN`, `GITHUB_OWNER`, and `GITHUB_REPO` so bug reports and feedback from the issue tab are published as GitHub issues.
+
+> ℹ️ The assistant can ground answers with repository context or perform a quick DuckDuckGo web lookup. Missing credentials will surface friendly messages in the UI instead of failing silently.
 
 ### 3. Firebase Setup
 

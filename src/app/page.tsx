@@ -6,6 +6,7 @@ import ImageGenerator from '@/components/ImageGenerator'
 import FirestoreDemo from '@/components/FirestoreDemo'
 import UserProfile from '@/components/UserProfile'
 import PendingApprovalNotice from '@/components/PendingApprovalNotice'
+import ChatBotWidget from '@/components/ChatBotWidget'
 
 const features = [
   {
@@ -211,6 +212,8 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      <ChatBotWidget />
     </main>
   )
 }
