@@ -64,3 +64,12 @@ GITHUB_TOKEN=your_github_personal_access_token
 GITHUB_OWNER=your_github_username_or_org
 GITHUB_REPO=your_repository_name
 PORT=3001
+
+#### agent and commands ###
+
+do we need agent that checks proejcts is setup and ready to dpeloy??
+
+https://github.com/anthropics/claude-code-action
+https://github.com/anthropics/claude-code-security-review
+https://github.com/OneRedOak/claude-code-workflows
+https://github.com/wshobson/agents

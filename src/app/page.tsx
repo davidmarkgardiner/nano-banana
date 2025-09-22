@@ -15,7 +15,7 @@ const features = [
     icon: '🔐',
     title: 'Authentication Flows',
     description:
-      'Google sign-in with admin approvals keeps the canvas secure without managing local passwords or accounts.',
+      'Google or email sign-in with admin approvals keeps the canvas secure without managing unreviewed accounts.',
   },
   {
     icon: '🎨',
@@ -44,7 +44,7 @@ const heroHighlights = [
   },
   {
     icon: '🔐',
-    label: 'Admin-gated Google authentication in minutes, no passwords required.',
+    label: 'Admin-gated authentication in minutes with Google or email options.',
   },
   {
     icon: '⚡',
@@ -62,7 +62,7 @@ const workflowSteps = [
   {
     number: '01',
     title: 'Request access',
-    description: 'Sign in with Google and automatically route approvals to your admin workspace.',
+    description: 'Sign in with Google or email and automatically route approvals to your admin workspace.',
     accent: 'from-sky-500/20 via-sky-500/10 to-transparent',
   },
   {
@@ -155,7 +155,7 @@ export default function Home() {
           ? 'Approved'
           : user
             ? 'Awaiting approval'
-            : 'Google sign-in ready',
+            : 'Email or Google sign-in ready',
     },
     {
       label: 'Firestore',
@@ -272,7 +272,7 @@ export default function Home() {
                     Bring your ideas to life with the Nano Banana AI canvas
                   </h1>
                   <p className="mt-4 max-w-xl text-base text-slate-300 sm:text-lg">
-                    Sign in with Google to describe your dream scene and watch the generator fill the screen with rich, download-ready artwork in seconds.
+                    Sign in with Google or email to describe your dream scene and watch the generator fill the screen with rich, download-ready artwork in seconds.
                   </p>
                 </div>
 
@@ -451,7 +451,7 @@ export default function Home() {
               </span>
               <h2 className="mt-6 text-3xl font-semibold text-white sm:text-4xl">Secure sign-in and review process</h2>
               <p className="mt-4 text-sm text-slate-300 sm:text-base">
-                Google authentication, admin approvals, and Firestore demos are ready the moment you join. Choose your path below.
+                Flexible authentication (Google or email), admin approvals, and Firestore demos are ready the moment you join. Choose your path below.
               </p>
             </div>
 
@@ -488,7 +488,7 @@ export default function Home() {
                 Powerful building blocks for your AI-powered app
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300">
-                Secure Google authentication, admin-reviewed access, AI image generation, and Firestore data storage with instant feedback. Everything is wired for rapid iteration and beautiful user experiences.
+                Secure authentication with Google or email, admin-reviewed access, AI image generation, and Firestore data storage with instant feedback. Everything is wired for rapid iteration and beautiful user experiences.
               </p>
               <dl className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {capabilityHighlights.map((item) => (

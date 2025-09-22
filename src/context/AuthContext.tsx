@@ -1,7 +1,15 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth'
+import {
+  User,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+} from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore'
 
 import { auth, googleProvider, db } from '@/lib/firebase'
@@ -24,6 +32,8 @@ interface AuthContextType {
   user: User | null
   loading: boolean
   loginWithGoogle: () => Promise<void>
+  loginWithEmail: (email: string, password: string) => Promise<void>
+  registerWithEmail: (email: string, password: string, displayName?: string) => Promise<void>
   logout: () => Promise<void>
   approvalStatus: ApprovalStatus
   approvalLoading: boolean
@@ -49,6 +59,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const loginWithGoogle = async () => {
     if (!auth || !googleProvider) throw new Error('Firebase Auth not initialized')
     await signInWithPopup(auth, googleProvider)
+  }
+
+  const loginWithEmail = async (email: string, password: string) => {
+    if (!auth) throw new Error('Firebase Auth not initialized')
+    await signInWithEmailAndPassword(auth, email, password)
+  }
+
+  const registerWithEmail = async (email: string, password: string, displayName?: string) => {
+    if (!auth) throw new Error('Firebase Auth not initialized')
+
+    const credential = await createUserWithEmailAndPassword(auth, email, password)
+
+    if (displayName) {
+      try {
+        await updateProfile(credential.user, { displayName })
+      } catch (profileError) {
+        console.warn('Failed to update display name for email registration:', profileError)
+      }
+    }
   }
 
   const logout = async () => {
@@ -178,6 +207,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     loading,
     loginWithGoogle,
+    loginWithEmail,
+    registerWithEmail,
     logout,
     approvalStatus,
     approvalLoading,
