@@ -31,7 +31,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'imageUrl must be a data URL or absolute HTTP/HTTPS URL' }, { status: 400 })
     }
 
-    const response = await fetch(imageUrl)
+    // Add API key for Gemini URLs (video downloads require authentication)
+    let fetchUrl = imageUrl
+    const headers: Record<string, string> = {}
+
+    if (imageUrl.includes('generativelanguage.googleapis.com')) {
+      const apiKey = process.env.GEMINI_API_KEY
+      if (apiKey) {
+        // Add API key as query parameter
+        const url = new URL(imageUrl)
+        url.searchParams.set('key', apiKey)
+        fetchUrl = url.toString()
+      }
+    }
+
+    const response = await fetch(fetchUrl, { headers })
 
     if (!response.ok) {
       return NextResponse.json(

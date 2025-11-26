@@ -11,6 +11,7 @@ import { useCanvasImage } from '@/context/CanvasImageContext'
 import { ImageFilter } from '@/lib/imageFilters'
 import { useImageRemix } from '@/hooks/useImageRemix'
 import ImageTransfusionPanel from '@/components/ImageTransfusionPanel'
+import VideoGenerationPanel from '@/components/VideoGenerationPanel'
 
 interface ImageGeneratorProps {
   user: User
@@ -39,9 +40,9 @@ const quickTips = [
   }
 ]
 
-const highlightPills = [
-  { icon: '⚡', text: 'Live feedback while you generate' },
-  { icon: '🖼️', text: '1024px high-definition output' },
+const getHighlightPills = (usePro: boolean) => [
+  { icon: '⚡', text: usePro ? 'Advanced thinking mode' : 'Live feedback while you generate' },
+  { icon: '🖼️', text: usePro ? 'Up to 4K resolution output' : '1024px high-definition output' },
   { icon: '⬇️', text: 'One-click download & share ready' }
 ]
 
@@ -52,10 +53,14 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
     setPrompt,
     isLoading,
     error,
+    usePro,
+    setUsePro,
     generateImage,
     clearError,
     reset
   } = useImageGeneration()
+
+  const highlightPills = getHighlightPills(usePro)
 
   const {
     currentImage,
@@ -162,9 +167,45 @@ export default function ImageGenerator({ user, onLogout }: ImageGeneratorProps) 
               ))}
             </div>
 
+            {/* Model Selection Toggle */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <span className="text-sm font-medium text-slate-200">Model:</span>
+              <div className="inline-flex rounded-full border border-white/20 bg-white/5 p-1 backdrop-blur-lg">
+                <button
+                  type="button"
+                  onClick={() => setUsePro(false)}
+                  disabled={isLoading}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    !usePro
+                      ? 'bg-gradient-to-r from-sky-500 to-cyan-500 text-white shadow-lg'
+                      : 'text-slate-300 hover:text-white'
+                  } disabled:opacity-50`}
+                >
+                  🍌 Nano Banana
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUsePro(true)}
+                  disabled={isLoading}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                    usePro
+                      ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg'
+                      : 'text-slate-300 hover:text-white'
+                  } disabled:opacity-50`}
+                >
+                  ✨ Nano Banana Pro
+                </button>
+              </div>
+              <span className="text-xs text-slate-400">
+                {usePro ? 'Higher quality, 4K support, slower' : 'Fast generation, 1024px'}
+              </span>
+            </div>
+
             <PromptInspiration onUsePrompt={handlePromptInspirationUse} isGenerating={isLoading} className="max-w-2xl mx-auto" />
 
             <ImageTransfusionPanel className="mx-auto w-full max-w-5xl" />
+
+            <VideoGenerationPanel className="mx-auto w-full max-w-5xl" />
 
             <div className="text-center lg:text-left">
               <h2 className="text-4xl font-semibold leading-tight text-white sm:text-5xl">

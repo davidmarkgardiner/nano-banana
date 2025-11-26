@@ -3,14 +3,19 @@ import {
   NanoBananaAPIResponse,
   NanoBananaImageEditRequest,
   NanoBananaImageTransfusionRequest,
+  NanoBananaGenerateOptions,
+  VideoGenerationRequest,
+  VideoGenerationResponse,
 } from '@/types'
 
 // Mock implementation for development
 // This will be replaced with actual API integration later
 class MockNanoBananaAPI implements NanoBananaAPI {
-  async generateImage(prompt: string): Promise<NanoBananaAPIResponse> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000))
+  async generateImage(prompt: string, options?: NanoBananaGenerateOptions): Promise<NanoBananaAPIResponse> {
+    const usePro = options?.usePro ?? false
+
+    // Simulate API delay (Pro takes longer due to thinking)
+    await new Promise(resolve => setTimeout(resolve, usePro ? 4000 + Math.random() * 3000 : 2000 + Math.random() * 3000))
 
     // Simulate occasional errors for testing
     if (Math.random() < 0.1) {
@@ -19,15 +24,16 @@ class MockNanoBananaAPI implements NanoBananaAPI {
 
     // Return mock data with placeholder image
     const mockImageId = Math.random().toString(36).substring(7)
+    const size = usePro ? 1024 : 512
 
     return {
-      imageUrl: `https://picsum.photos/512/512?random=${mockImageId}`,
+      imageUrl: `https://picsum.photos/${size}/${size}?random=${mockImageId}`,
       id: mockImageId,
       metadata: {
-        model: 'nano-banana-v1-mock',
+        model: usePro ? 'nano-banana-pro-mock' : 'nano-banana-v1-mock',
         dimensions: {
-          width: 512,
-          height: 512
+          width: size,
+          height: size
         },
         generatedAt: new Date(),
         prompt,
@@ -82,6 +88,26 @@ class MockNanoBananaAPI implements NanoBananaAPI {
         generatedAt: new Date(),
         prompt: instruction,
       }
+    }
+  }
+
+  async generateVideo(request: VideoGenerationRequest): Promise<VideoGenerationResponse> {
+    await new Promise(resolve => setTimeout(resolve, 3000 + Math.random() * 2000))
+
+    const mockId = Math.random().toString(36).substring(7)
+    const videoUrl = 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4'
+
+    return {
+      videoUrl,
+      id: mockId,
+      metadata: {
+        model: 'veo-3.1-generate-preview (mock)',
+        durationSeconds: request.durationSeconds,
+        aspectRatio: request.aspectRatio,
+        resolution: request.resolution || '720p',
+        generatedAt: new Date(),
+        prompt: request.prompt,
+      },
     }
   }
 }
@@ -146,14 +172,14 @@ async function parseNanoBananaResponse<T>(response: Response): Promise<T> {
 
 // Production API implementation using server-side endpoint
 class NanoBananaAPIClient implements NanoBananaAPI {
-  async generateImage(prompt: string): Promise<NanoBananaAPIResponse> {
+  async generateImage(prompt: string, options?: NanoBananaGenerateOptions): Promise<NanoBananaAPIResponse> {
     try {
       const response = await fetch('/api/generate-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt, usePro: options?.usePro ?? false })
       })
 
       return await parseNanoBananaResponse<NanoBananaAPIResponse>(response)
@@ -209,6 +235,28 @@ class NanoBananaAPIClient implements NanoBananaAPI {
       }
 
       throw new Error('An unexpected error occurred while transfusing the images')
+    }
+  }
+
+  async generateVideo(request: VideoGenerationRequest): Promise<VideoGenerationResponse> {
+    try {
+      const response = await fetch('/api/generate-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      })
+
+      return await parseNanoBananaResponse<VideoGenerationResponse>(response)
+    } catch (error) {
+      console.error('API Error:', error)
+
+      if (error instanceof Error) {
+        throw error
+      }
+
+      throw new Error('An unexpected error occurred while generating the video')
     }
   }
 }

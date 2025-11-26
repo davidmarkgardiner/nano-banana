@@ -31,6 +31,32 @@ export interface NanoBananaAPIResponse {
   metadata: ImageMetadata
 }
 
+export interface VideoMetadata {
+  model: string
+  durationSeconds: number
+  aspectRatio: '16:9' | '9:16'
+  resolution: '720p' | '1080p'
+  generatedAt: Date
+  prompt: string
+}
+
+export interface VideoGenerationRequest {
+  prompt: string
+  aspectRatio: '16:9' | '9:16'
+  durationSeconds: 4 | 6 | 8
+  resolution?: '720p' | '1080p'
+  negativePrompt?: string
+  personGeneration?: boolean
+  model?: string
+  referenceImageDataUrl?: string
+}
+
+export interface VideoGenerationResponse {
+  videoUrl: string
+  id: string
+  metadata: VideoMetadata
+}
+
 export interface NanoBananaImageEditRequest {
   imageDataUrl: string
   instruction: string
@@ -42,10 +68,15 @@ export interface NanoBananaImageTransfusionRequest {
   instruction: string
 }
 
+export interface NanoBananaGenerateOptions {
+  usePro?: boolean  // Use Nano Banana Pro (gemini-3-pro-image-preview) for higher quality
+}
+
 export interface NanoBananaAPI {
-  generateImage(prompt: string): Promise<NanoBananaAPIResponse>
+  generateImage(prompt: string, options?: NanoBananaGenerateOptions): Promise<NanoBananaAPIResponse>
   editImage(request: NanoBananaImageEditRequest): Promise<NanoBananaAPIResponse>
   transfuseImages(request: NanoBananaImageTransfusionRequest): Promise<NanoBananaAPIResponse>
+  generateVideo(request: VideoGenerationRequest): Promise<VideoGenerationResponse>
 }
 
 export interface PromptSuggestionResponse {
@@ -60,7 +91,38 @@ export interface UseImageGenerationReturn {
   generatedImage: string | null
   isLoading: boolean
   error: string | null
+  usePro: boolean
+  setUsePro: (usePro: boolean) => void
   generateImage: (promptOverride?: string) => Promise<void>
+  clearError: () => void
+  reset: () => void
+}
+
+export interface UseVideoGenerationReturn {
+  prompt: string
+  setPrompt: (prompt: string) => void
+  aspectRatio: '16:9' | '9:16'
+  setAspectRatio: (aspect: '16:9' | '9:16') => void
+  durationSeconds: 4 | 6 | 8
+  setDurationSeconds: (duration: 4 | 6 | 8) => void
+  resolution: '720p' | '1080p'
+  setResolution: (resolution: '720p' | '1080p') => void
+  negativePrompt: string
+  setNegativePrompt: (prompt: string) => void
+  allowPeople: boolean
+  setAllowPeople: (allow: boolean) => void
+  model: string
+  setModel: (model: string) => void
+  useReferenceImage: boolean
+  setUseReferenceImage: (useRef: boolean) => void
+  referenceImageDataUrl: string | null
+  setReferenceImageDataUrl: (dataUrl: string | null) => void
+  setReferenceFromCanvas: () => Promise<string | null>
+  isLoading: boolean
+  error: string | null
+  videoUrl: string | null
+  statusMessage: string
+  generateVideo: () => Promise<void>
   clearError: () => void
   reset: () => void
 }
