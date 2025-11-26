@@ -159,7 +159,7 @@ export default function VideoGenerationPanel({ className = '' }: VideoGeneration
               {allowPeople ? 'Enabled' : 'Disabled'}
             </button>
             <span className="text-xs text-slate-400">
-              Respect content policies; 1080p only 16:9 at 8s.
+              {allowPeople ? 'Videos may include human faces' : 'No human faces will be generated'}
             </span>
           </fieldset>
 
