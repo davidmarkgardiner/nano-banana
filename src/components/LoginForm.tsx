@@ -51,18 +51,18 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-slate-100 shadow-xl backdrop-blur-xl">
-      <div className="pointer-events-none absolute -top-20 right-0 h-40 w-40 rounded-full bg-sky-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-indigo-500/20 blur-3xl" />
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 text-slate-100 shadow-xl backdrop-blur-xl glass animate-scale-in">
+      <div className="pointer-events-none absolute -top-20 right-0 h-40 w-40 rounded-full bg-sky-500/20 blur-3xl animate-float" />
+      <div className="pointer-events-none absolute -bottom-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-indigo-500/20 blur-3xl animate-float stagger-3" />
 
-      <h2 className="relative text-2xl font-semibold text-center text-white">Access the Nano Banana toolkit</h2>
+      <h2 className="relative text-2xl font-semibold text-center text-white">Access the <span className="text-gradient-primary">Nano Banana</span> toolkit</h2>
 
       <p className="mt-3 text-sm text-center text-slate-300">
         Sign in with Google or continue with your email and password to request access. An administrator must approve every account before you can generate images or store content.
       </p>
 
       {error && (
-        <div className="relative mt-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 p-3 text-sm text-rose-100">
+        <div className="relative mt-4 rounded-2xl border border-rose-400/40 bg-rose-500/10 p-3 text-sm text-rose-100 animate-fade-in-down">
           {error}
         </div>
       )}
@@ -70,7 +70,7 @@ export default function LoginForm() {
       <button
         onClick={handleGoogleLogin}
         disabled={isGoogleSubmitting || isEmailSubmitting}
-        className="relative mt-6 flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:border-white/30 hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-50"
+        className="relative mt-6 flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm font-semibold text-slate-100 transition-all duration-300 hover:border-white/30 hover:bg-white/20 hover:scale-[1.02] hover:shadow-lg hover:shadow-sky-500/20 focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-50 active:scale-[0.98]"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24">
           <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -172,7 +172,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isGoogleSubmitting || isEmailSubmitting}
-          className="mt-2 w-full rounded-full border border-white/20 bg-sky-500/80 px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-50"
+          className="mt-2 w-full rounded-full border border-white/20 bg-gradient-to-r from-sky-500 to-indigo-500 px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition-all duration-300 hover:shadow-lg hover:shadow-sky-500/30 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-50 active:scale-[0.98]"
         >
           {isEmailSubmitting
             ? authMode === 'login'
@@ -184,7 +184,7 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <div className="relative mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200">
+      <div className="relative mt-6 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-200 transition-all duration-300 hover:border-white/20 hover:bg-white/10">
         <p className="font-semibold uppercase tracking-[0.3em] text-sky-100">Admin approval required</p>
         <p className="mt-2 text-slate-300">
           After signing in, your request will be sent to the admin team. You will gain full access as soon as your account is approved.
