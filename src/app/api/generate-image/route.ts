@@ -46,9 +46,6 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
       model: selectedModel,
-      generationConfig: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
     })
 
     // Generate the image with the provided prompt

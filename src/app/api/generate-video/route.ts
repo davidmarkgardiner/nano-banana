@@ -92,8 +92,8 @@ async function fetchJson<T>(url: string, init: RequestInit, signal?: AbortSignal
   let data: T | GeminiErrorResponse
   try {
     data = text ? JSON.parse(text) : {}
-  } catch (err) {
-    console.error('[Video API] Failed to parse response:', text.slice(0, 500))
+  } catch (parseError) {
+    console.error('[Video API] Failed to parse response:', text.slice(0, 500), parseError)
     throw new Error('Unexpected response from Gemini.')
   }
 
