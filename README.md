@@ -19,6 +19,7 @@ A modern web application for generating AI images from text prompts, built with 
 
 ### Planned Features (In Development)
 - 🎨 **AI Image Generation** - Generate images from text prompts using nano-banana API
+- 🎥 **AI Video Generation (Veo)** - Generate short cinematic clips with aspect/duration controls (beta)
 - 💾 **Image History** - Save and manage your generated images in Firestore
 - 🔄 **Real-time Updates** - Live status updates during image generation
 - 📤 **Image Export** - Download and share generated images
@@ -68,6 +69,9 @@ ANTHROPIC_MODEL=claude-3-sonnet-20240229
 GITHUB_TOKEN=github_pat_goes_here
 GITHUB_OWNER=your-github-username-or-org
 GITHUB_REPO=your-repo-name
+# Video (Veo) generation
+GEMINI_VIDEO_MODEL=veo-3.1-generate-preview
+GEMINI_VIDEO_TIMEOUT_MS=90000
 ```
 
 ### 2.1 Configure the Chatbot Assistant
@@ -168,6 +172,13 @@ npx playwright test  # Run end-to-end tests
 - **TextPromptInput**: Handles user input with validation and character limits
 - **ImageDisplay**: Shows generated images with loading/error states
 - **ImageHistory**: Displays user's previous generations (optional feature)
+
+### Video Generation Workflow (Beta)
+- **Model**: Veo (`GEMINI_VIDEO_MODEL`, default `veo-3.1-generate-preview`) with UI model picker (3.1 preview, 3.0, 3.0 lite).
+- **Inputs**: Prompt (3–500 chars), aspect ratio 16:9 or 9:16, duration 4/6/8s, resolution 720p (1080p only when 16:9 + 8s), optional negative prompt, optional people toggle.
+- **API**: `POST /api/generate-video` polls Gemini operations until ready and returns a downloadable video URL plus metadata.
+- **UI**: Video panel in the canvas with progress hints, playback, and download link; supports using the current canvas image as a reference (auto-enforces 16:9 + 8s); mock-friendly when `NEXT_PUBLIC_USE_REAL_API=false`.
+- **Storage**: When signed in, generated videos auto-save to Firebase Storage under `nano-banana-videos/<uid>/...`.
 
 ## 🛠️ Development Workflow
 
