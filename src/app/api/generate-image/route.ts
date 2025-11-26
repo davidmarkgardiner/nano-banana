@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
+// Model options for image generation
+const MODELS = {
+  standard: 'gemini-2.5-flash-image',      // Nano Banana - fast, 1024px
+  pro: 'gemini-3-pro-image-preview',        // Nano Banana Pro - 4K, thinking, search grounding
+} as const
+
 export async function POST(request: NextRequest) {
   try {
-    const { prompt } = await request.json()
+    const { prompt, usePro = false } = await request.json()
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json(
@@ -35,9 +41,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const selectedModel = usePro ? MODELS.pro : MODELS.standard
+
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash-image-preview'
+      model: selectedModel,
+      generationConfig: {
+        responseModalities: ['TEXT', 'IMAGE'],
+      },
     })
 
     // Generate the image with the provided prompt
@@ -98,10 +109,11 @@ export async function POST(request: NextRequest) {
       imageUrl,
       id: imageId,
       metadata: {
-        model: 'gemini-2.5-flash-image-preview',
+        model: selectedModel,
+        isPro: usePro,
         dimensions: {
-          width: 1024,
-          height: 1024
+          width: usePro ? 2048 : 1024,  // Pro supports up to 4K
+          height: usePro ? 2048 : 1024
         },
         generatedAt: new Date()
       }

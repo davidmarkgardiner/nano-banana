@@ -7,34 +7,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { storage } from '@/lib/firebase'
 import { useAuth } from '@/context/AuthContext'
 import { useCanvasImage } from '@/context/CanvasImageContext'
-
-const MAX_PROMPT_SLUG_LENGTH = 60
-
-const createPromptSlug = (text: string): string => {
-  const normalized = text
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, ' ')
-    .replace(/-+/g, '-')
-
-  if (!normalized) {
-    return 'image'
-  }
-
-  const abbreviated = normalized
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 6)
-    .join('-')
-    .replace(/-+/g, '-')
-
-  const slug = abbreviated.slice(0, MAX_PROMPT_SLUG_LENGTH).replace(/^-+|-+$/g, '')
-
-  return slug || 'image'
-}
-
-const formatTwoDigits = (value: number): string => value.toString().padStart(2, '0')
+import { createPromptSlug, formatTwoDigits } from '@/lib/promptSlug'
 
 export function useImageGeneration(): UseImageGenerationReturn {
   const { user } = useAuth()
@@ -43,6 +16,7 @@ export function useImageGeneration(): UseImageGenerationReturn {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [usePro, setUsePro] = useState(false)
 
   const generateImage = useCallback(
     async (promptOverride?: string) => {
@@ -72,7 +46,7 @@ export function useImageGeneration(): UseImageGenerationReturn {
           setPrompt(sanitizedPrompt)
         }
 
-        const response = await nanoBananaAPI.generateImage(sanitizedPrompt)
+        const response = await nanoBananaAPI.generateImage(sanitizedPrompt, { usePro })
         setGeneratedImage(response.imageUrl)
         if (response.imageUrl) {
           showGeneratedImage(response.imageUrl, sanitizedPrompt)
@@ -132,7 +106,7 @@ export function useImageGeneration(): UseImageGenerationReturn {
         setIsLoading(false)
       }
     },
-    [prompt, showGeneratedImage, user]
+    [prompt, showGeneratedImage, user, usePro]
   )
 
   const clearError = useCallback(() => {
@@ -153,6 +127,8 @@ export function useImageGeneration(): UseImageGenerationReturn {
     generatedImage,
     isLoading,
     error,
+    usePro,
+    setUsePro,
     generateImage,
     clearError,
     reset
